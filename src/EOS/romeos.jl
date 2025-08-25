@@ -51,11 +51,37 @@ function RoMEoS(fn, smiles, E; ref_state = nothing, verbose = false)
     # Get parameters (Mw and smiles)
     mol = RDK.get_mol(smiles)
     descs = RDK.get_descriptors(mol)
-    params = RoMEoSIdealParam(
-        scale(lmodel.scaler.emb, E),
+    scaler = MLPROP_EOS.get_scaler(lmodel)
+
+    # Ideal model
+    smodel_id = StatefulLuxLayer{true}(lmodel.id, ps.id, st.id)
+    model_id = RoMEoSIdeal(smodel_id, smiles, E; ref_state)
+
+    # Get parameters (Mw and smiles)
+    params = RoMEoSParam(
+        scale(scaler.emb, E),
         Clapeyron.__init_reference_state_kw(ref_state),
         SingleParam("molecular weight",[smiles],Float32[descs["amw"]]),
     )
 
+    # Create model
+    smodel_res = StatefulLuxLayer{true}(lmodel.res, ps.res, st.res)
+    model = RoMEoS([smiles], params, smodel_res, model_id, scaler, String[])
 
+    return model
+end
+
+function CL.a_res(model::RoMEoS, V, T, z)
+    ∑z = sum(z)
+    V⁻¹ = 1/V
+    ϱ = ∑z * V⁻¹ 
+
+    X = [
+        scale(model.scaler.ϱ,ϱ);
+        scale(model.scaler.T,T);
+        model.params.Mw[1].*1f-3;
+        model.params.Es;;
+    ]
+
+    return ∑z*first(model.smodel(X))/Rgas(model)/T
 end
