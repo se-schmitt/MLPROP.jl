@@ -25,7 +25,7 @@ function r_hal(SMILES::String,descs::Dict)
 end
 
 
-struct MOLE_DESC
+struct SEB
     X_j::Vector
     X_i::Vector
 
