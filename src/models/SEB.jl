@@ -1,4 +1,4 @@
-using RDKitMinimalLib
+
 function M(descs::Dict)
     return get(descs,"exactmw",0)
 end
@@ -25,15 +25,30 @@ function r_hal(SMILES::String,descs::Dict)
 end
 
 
-struct SEB
-    X_j::Vector
-    X_i::Vector
-
+struct SEBParam
+    "Molar mass in `kg/mol`"
+    M
+    "Correction factor for the Stokes-Einstein equation"
+    b_ij
 end
+
+"""
+SEB()
+
+
+"""
+
+
+struct SEB{M}
+  components::Vector#{<AbstractString}
+  param::SEBParam
+  vis_model::M
+end
+
 function SEB(SMILE_i::String,SMILE_j::String)
     mol_i,mol_j = get_mol(SMILE_i), get_mol(SMILE_j)
     desc_i,desc_j = get_descriptors(mol_i), get_descriptors(mol_j)
     X_i_ini=[M(desc_i);R(desc_i);r_het(desc_i);r_hal(SMILE_i,desc_i);r_acc(desc_i);r_don(desc_i)]
     X_j_ini=[M(desc_j);R(desc_j);r_het(desc_j);r_hal(SMILE_j,desc_j);r_acc(desc_j);r_don(desc_j)]
-    return MOLE_DESC(X_j_ini,X_i_ini)
+    #b_ij Berechnung
 end
