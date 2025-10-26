@@ -49,7 +49,6 @@ mixture utilizing a neural network to boost the results of the Stokes-Einstein-e
 
 
 """
-
 struct SEB{M}
   components::Vector#{<AbstractString}
   param::SEBParam
@@ -61,11 +60,14 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     desc_i,desc_j = get_descriptors(mol_i), get_descriptors(mol_j)
     X_i_ini=[M(desc_i);R(desc_i);r_het(desc_i);r_hal(SMILE_i,desc_i);r_acc(desc_i);r_don(desc_i)]
     X_j_ini=[M(desc_j);R(desc_j);r_het(desc_j);r_hal(SMILE_j,desc_j);r_acc(desc_j);r_don(desc_j)]
+    NN-input=Tuple(collect(vcat(X_i_ini,X_j_ini)))
     MW=M(desc_i)
+
     #b_ij Berechnung => Modell
     #b_ij=20
     NN-nopara = Chain(Dense(10 => 32, relu),Dense(32 => 16, relu),Dense( 16 => 1, softplus))
-    
+    #setup()
+
     #paramSEB=SEBParam(MW,b_ij)
     return SEB([SMILE_i;SMILE_j],paramSEB,eta_fun)
 end
