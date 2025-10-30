@@ -77,7 +77,7 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
         (layer_3=(weight=wb[6],bias=vec(wb[5]))))
 
         b_ij, st = NN(input,ps,st_0)
-        b_ij_sum = b_ij_sum+b_ij
+        b_ij_sum = b_ij_sum+b_ij[1]
 
     end
     b_ij_mean=b_ij/10
