@@ -89,6 +89,8 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     return SEB([SMILE_i;SMILE_j],paramSEB,eta_fun)
 end
 
+Base.broadcastable(x::SEB) = Ref(x)
+
 function Diffusion(model::SEB,p::Float64,T::Float64)
 
 k_b, roh_i, f, M_i,visc_j,N_A = 1.380649*10^(-23), 1050, 0.64, model.param.M, model.vis_model(T),6.02214076*10^23
