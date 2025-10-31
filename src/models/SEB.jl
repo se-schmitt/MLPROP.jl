@@ -92,12 +92,11 @@ end
 Base.broadcastable(x::SEB) = Ref(x)
 
 function Diffusion(model::SEB,p::Float64,T::Float64)
+    k_b, roh_i, f, M_i,visc_j,N_A = 1.380649*10^(-23), 1050, 0.64, model.param.M, model.vis_model(T),6.02214076*10^23
 
-k_b, roh_i, f, M_i,visc_j,N_A = 1.380649*10^(-23), 1050, 0.64, model.param.M, model.vis_model(T),6.02214076*10^23
+    D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*(((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)))
 
-D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*(((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)))
-
-return D_SEE_ij_infdil*model.param.b_ij
+    return D_SEE_ij_infdil*model.param.b_ij[1]
 
 end
 
