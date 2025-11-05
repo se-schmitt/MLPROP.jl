@@ -104,7 +104,7 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     b_ij_mean=b_ij/10
 
     # Constructing SEBParam-datastructure
-    paramSEB=SEBParam(MW,b_ij_mean)
+    paramSEB=SEBParam(MW,b_ij_mean[1])
 
 
     return SEB([SMILE_i;SMILE_j],paramSEB,eta_fun)
