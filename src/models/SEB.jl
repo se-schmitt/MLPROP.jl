@@ -114,7 +114,12 @@ Base.broadcastable(x::SEB) = Ref(x)
 
 function Diffusion(model::SEB,p,T)
     # Initialitzing constants required for Stokes-Einstein-equation
-    k_b, roh_i, f, M_i,visc_j,N_A = 1.380649*10^(-23), 1050, 0.64, model.param.M, model.vis_model(T),6.02214076*10^23
+    k_b = 1.380649*10^(-23)
+    roh_i= 1050
+    f=0.64
+    M_i=model.param.M
+    visc_j=model.vis_model(T)
+    N_A=6.02214076*10^23
 
     D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*(((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)))
 
