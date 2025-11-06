@@ -103,7 +103,7 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     b_ij_mean=b_ij_mean/length(nn_parameters)
 
     # Constructing SEBParam-datastructure
-    paramSEB=SEBParam(MW,b_ij_mean[1])
+    paramSEB=SEBParam(MW,b_ij_mean)
 
 
     return SEB([SMILE_i;SMILE_j],paramSEB,eta_fun)
@@ -113,15 +113,15 @@ Base.broadcastable(x::SEB) = Ref(x)
 
 function Diffusion(model::SEB,p,T)
     # Initialitzing constants required for Stokes-Einstein-equation
-    k_b = 1.380649*(10^(-23))
+    k_b = 1.380649e-23
     roh_i= 1050
     f=0.64
     M_i=model.param.M
     visc_j=model.vis_model(T)
-    N_A=6.02214076*(10^23)
+    N_A=6.02214076e23
     r_i=((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)
-    print(r_i)
     D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*r_i)
+    print(D_SEE_ij_infdil)
     return D_SEE_ij_infdil*model.param.b_ij[1]
 
 end
