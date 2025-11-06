@@ -84,20 +84,20 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     b_ij_mean=0
 
     #Initializing Neural Net using Lux
-    NN = Chain(Dense(12 => 32, relu),Dense(32 => 16, relu),Dense( 16 => 1, softplus))
+    NN = Chain(Dense(12 => 32,relu),Dense(32 => 16,relu),Dense( 16 => 1,softplus))
     #keys=["SEB_3";"SEB_7";"SEB_9";"SEB_12";"SEB_17";"SEB_19";"SEB_33";"SEB_42";"SEB_49";"SEB_55"]
 
     # Looping over parameter-sets to determine mean b_ij
     for (key,wb) in nn_parameters
 
         #Setting up the weights and bias of the neural net using Lux-Synatx
-        st_0=(layer_1=NamedTuple(),layer_2=NamedTuple(),layer_3=NamedTuple())
+        st=(layer_1=NamedTuple(),layer_2=NamedTuple(),layer_3=NamedTuple())
         ps=((layer_1=(weight=wb[2],bias=vec(wb[1]))),
         (layer_2=(weight=wb[4],bias=vec(wb[3]))),
         (layer_3=(weight=wb[6],bias=vec(wb[5]))))
 
         #applying neural net with given weights and bias to calculate b_ij
-        b_ij, st = NN(input,ps,st_0)  
+        b_ij, st = NN(input,ps,st)
         b_ij_mean += first(b_ij)  
     end
     b_ij_mean=b_ij_mean/length(nn_parameters)
@@ -121,7 +121,6 @@ function Diffusion(model::SEB,p,T)
     N_A=6.02214076e23
     r_i=((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)
     D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*r_i)
-    print(D_SEE_ij_infdil)
     return D_SEE_ij_infdil*model.param.b_ij[1]
 
 end
