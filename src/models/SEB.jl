@@ -1,7 +1,7 @@
 
 function M(descs::Dict)
     #Calculating molecular weight of given molecul
-    return get(descs,"exactmw",0)
+    return get(descs,"exactmw",0)*(10^(-3))
 end
 
 function R(descs::Dict)
@@ -81,7 +81,7 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
 
     #b_ij Berechnung => Modell
     b_ij=0
-    b_ij_sum=0
+    b_ij_mean=0
 
     #Initializing Neural Net using Lux
     NN = Chain(Dense(12 => 32, relu),Dense(32 => 16, relu),Dense( 16 => 1, softplus))
@@ -97,11 +97,10 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
         (layer_3=(weight=wb[6],bias=vec(wb[5]))))
 
         #applying neural net with given weights and bias to calculate b_ij
-        b_ij, st = NN(input,ps,st_0)
-        b_ij_sum = b_ij_sum+b_ij[1]
-
+        b_ij, st = NN(input,ps,st_0)  
+        b_ij_mean += first(b_ij)  
     end
-    b_ij_mean=b_ij_sum/10
+    b_ij_mean=b_ij_mean/length(nn_parameters)
 
     # Constructing SEBParam-datastructure
     paramSEB=SEBParam(MW,b_ij_mean[1])
@@ -117,7 +116,7 @@ function Diffusion(model::SEB,p,T)
     k_b = 1.380649*(10^(-23))
     roh_i= 1050
     f=0.64
-    M_i=model.param.M*(10^(-3))
+    M_i=model.param.M
     visc_j=model.vis_model(T)
     N_A=6.02214076*(10^23)
     r_i=((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)
