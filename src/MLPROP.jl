@@ -4,7 +4,7 @@ using Clapeyron, Lux, ConcreteStructs
 using ROMEOSdev
 
 import RDKitMinimalLib
-import DataAndTrainingUtils: scale, unscale, RobustScaler, FixedZeroRobustScaler
+import CustomScalersSchedulers: scale, unscale, RobustScaler, FixedZeroRobustScaler
 
 const CL = Clapeyron
 const RDK = RDKitMinimalLib
