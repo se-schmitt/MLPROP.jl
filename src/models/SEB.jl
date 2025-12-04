@@ -75,13 +75,14 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     mol_i,mol_j = get_mol(SMILE_i), get_mol(SMILE_j)
     desc_i,desc_j = get_descriptors(mol_i), get_descriptors(mol_j)
   
-    X_i_ini=[M(desc_i);R(desc_i);r_het(desc_i);r_hal(SMILE_i,desc_i);r_acc(desc_i);r_don(desc_i)]
-    X_j_ini=[M(desc_j);R(desc_j);r_het(desc_j);r_hal(SMILE_j,desc_j);r_acc(desc_j);r_don(desc_j)]
+    X_i_ini=[M(desc_i);r_acc(desc_i);r_don(desc_i);r_het(desc_i); r_hal(SMILE_i,desc_i);R(desc_i)]
+    X_j_ini=[M(desc_j);r_acc(desc_j);r_don(desc_j);r_het(desc_j); r_hal(SMILE_j,desc_j);R(desc_j)]
+    
     if SMILE_i == "O"
-        X_i_ini=[M(desc_i);R(desc_i);r_het(desc_i);r_hal(SMILE_i,desc_i);0.5;0.5]
+       X_i_ini=[M(desc_i);0.5;0.5;r_het(desc_i); r_hal(SMILE_i,desc_i);R(desc_i)]
     end
     if SMILE_j == "O"
-        X_j_ini=[M(desc_j);R(desc_j);r_het(desc_j);r_hal(SMILE_j,desc_j);0.5;0.5]
+        X_j_ini=[M(desc_j);0.5;0.5;r_het(desc_j); r_hal(SMILE_j,desc_j);R(desc_j)]
     end
     input=vcat(X_i_ini,X_j_ini)
     print(input)
@@ -104,8 +105,6 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
         ps=((layer_1=(weight=wb[2],bias=vec(wb[1]))),
         (layer_2=(weight=wb[4],bias=vec(wb[3]))),
         (layer_3=(weight=wb[6],bias=vec(wb[5]))))
-
-
         #applying neural net with given weights and bias to calculate b_ij
         b_ij, st = NN(input,ps,st)
         b_ij_mean += first(b_ij)  
