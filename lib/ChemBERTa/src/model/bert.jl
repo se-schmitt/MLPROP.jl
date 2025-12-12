@@ -128,11 +128,15 @@ struct ChemBERTaModel
     tokenizer::ChemBERTaTokenizer
 end
 function (model::ChemBERTaModel)(smiles::AbstractString)
-    enc = encode(model.tokenizer, smiles)
-    _token = getindex.(findall(enc.token), 1)
-    input_ids = _token[2:end-1]                         # TODO correct?
+    # Canonicalize smiles
+    _smiles = get_smiles(get_mol(smiles))
+
+    # tokenizer
+    enc = encode(model.tokenizer.encoder, _smiles)
+    input_ids = getindex.(findall(enc.token), 1)
+    
+    # ChemBERTa
     output = model.smodel(input_ids)
     
-    output_squeezed = dropdims(output, dims=3)          # TODO required?
-    return output_squeezed
+    return output[:,1,1]
 end

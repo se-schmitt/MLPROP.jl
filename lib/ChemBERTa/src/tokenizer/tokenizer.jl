@@ -1,9 +1,13 @@
 # Load tokenizer
-function load_tokenizer()
+function load_tokenizer(config::Dict)
     path_vocab_json = joinpath(DATADIR, "vocab.json")
     vocab = JSON.parsefile(path_vocab_json)
+    idx_sort = sortperm(collect(values(vocab)))
+    vocab_vector = collect(keys(vocab))[idx_sort]
+    # vocab_vector = "[unused" .* string.(0:config["vocab_size"]-1) .* "]"
+    # setindex!.(Ref(vocab_vector), collect(keys(vocab)), Int.(collect(values(vocab))).+1)
     encoder = TransformerTextEncoder(
-        split_smiles, [keys(vocab)...]; 
+        split_smiles, vocab_vector; 
         startsym="[CLS]", endsym="[SEP]", unksym="[UNK]", padsym="[PAD]", trunc=512
     )
     return ChemBERTaTokenizer(encoder)

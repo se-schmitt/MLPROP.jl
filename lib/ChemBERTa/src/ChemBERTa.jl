@@ -24,7 +24,8 @@ See XY for details.
 """
 module ChemBERTa
 
-using DataStructures, ConcreteStructs, JSON, Random
+using DataStructures, ConcreteStructs, JSON, Random, SafeTensors
+using RDKitMinimalLib: get_mol, get_smiles
 
 using Lux, NNlib
 
@@ -49,6 +50,7 @@ using NeuralAttentionlib: LengthMask, RevLengthMask
 const DATADIR = joinpath(pkgdir(@__MODULE__), "data")
 rng = Random.default_rng()
 
+include("utils.jl")
 include("api.jl")
 
 include("tokenizer/textencoder.jl")
