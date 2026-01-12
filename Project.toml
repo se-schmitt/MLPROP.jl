@@ -1,7 +1,7 @@
 name = "MLPROP"
 uuid = "5b10a24f-5c48-4ecd-8f3d-34970e95074b"
-authors = ["se-schmitt <se.s.schmitt@gmail.com> and contributors"]
 version = "1.0.0-DEV"
+authors = ["se-schmitt <se.s.schmitt@gmail.com> and contributors"]
 
 [deps]
 ChemBERTa = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
@@ -22,7 +22,8 @@ julia = "1.11"
 
 [extras]
 ChemBERTa = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ChemBERTa"]
+test = ["Test", "ChemBERTa", "DelimitedFiles"]
