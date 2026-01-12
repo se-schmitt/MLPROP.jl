@@ -53,7 +53,7 @@ end
 
 function RoMEoSIdeal(smodel::StatefulLuxLayer, smiles, E; ref_state=nothing)
 
-    scaler = ROMEOSdev.get_scaler(smodel)
+    scaler = get_scaler(smodel)
 
     # Get parameters (Mw and smiles)
     mol = RDK.get_mol(smiles)

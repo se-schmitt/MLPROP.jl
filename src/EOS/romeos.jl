@@ -51,7 +51,7 @@ function RoMEoS(fn, smiles, E; ref_state = nothing, verbose = false)
     # Get parameters (Mw and smiles)
     mol = RDK.get_mol(smiles)
     descs = RDK.get_descriptors(mol)
-    scaler = ROMEOSdev.get_scaler(lmodel)
+    scaler = get_scaler(lmodel)
 
     # Ideal model
     smodel_id = StatefulLuxLayer{true}(lmodel.id, ps.id, st.id)

@@ -1,2 +1,5 @@
-/Manifest*.toml
+Manifest*.toml
 scripts
+.vscode
+__pycache__
+.venv
