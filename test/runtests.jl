@@ -1,6 +1,9 @@
-using MLPROP
 using Test
 
 @testset "MLPROP.jl" begin
-    # Write your tests here.
+    include("mlprop.jl")
+end
+
+@testset "ChemBERTa.jl" begin
+    include("chemberta.jl")
 end
