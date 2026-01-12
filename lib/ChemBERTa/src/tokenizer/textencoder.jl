@@ -1,29 +1,5 @@
 abstract type AbstractTransformerTextEncoder <: AbstractTextEncoder end
 
-function Base.show(io::IO, e::AbstractTransformerTextEncoder)
-    print(io, "$(nameof(typeof(e)))(\n├─ ")
-    print(io, e.tokenizer)
-    _io = IOContext(io, :compact => true)
-    for name in fieldnames(typeof(e))
-        (name == :tokenizer || name == :process) && continue
-        val = getfield(e, name)
-        if !isnothing(val)
-            if val isa Base.Fix1{typeof(nestedcall)}
-                print(_io, ",\n├─ ", name, " = nestedcall")
-                val.x isa ComposedFunction || print(_io, '(')
-                FuncPipelines.show_pipeline_function(_io, val.x)
-                val.x isa ComposedFunction || print(_io, ')')
-            elseif !(val isa Pipelines) && val isa Function
-                print(_io, ",\n├─ ", name, " = ")
-                FuncPipelines.show_pipeline_function(_io, val)
-            else
-                print(_io, ",\n├─ ", name, " = ", val)
-            end
-        end
-    end
-    print(IOContext(io, :pipeline_display_prefix => "  ╰─ "), ",\n└─ process = ", e.process, "\n)")
-end
-
 """
     struct TrfTextEncoder{
         T <: AbstractTokenizer,
@@ -97,53 +73,6 @@ function TrfTextEncoder(tokenizer::AbstractTokenizer, vocab::AbstractVocabulary{
     return TrfTextEncoder(tokenizer, vocab, values(kws), annotate, process, onehot, decode, textprocess)
 end
 
-for name in fieldnames(TrfTextEncoder)
-    (name == :tokenizer || name == :vocab) && continue
-    @eval $(quote
-        """
-            set_$($(QuoteNode(name)))(builder, e::TrfTextEncoder)
-
-        Return a new text encoder with the `$($(QuoteNode(name)))` field replaced with `builder(e)`.
-        """
-        function $(Symbol(:set_, name))(builder, e::TrfTextEncoder)
-            setproperty!!(e, $(QuoteNode(name)), builder(e))
-        end
-    end)
-end
-
-"""
-    set_tokenizer(builder, e::TrfTextEncoder)
-
-Return a new text encoder with the `tokenizer` field replaced with `builder(e)`. `builder` can either return
- a `AbstractTokenizer` or a `AbstractTokenization`.
-"""
-function set_tokenizer(builder, e::TrfTextEncoder)
-    new_tkr = builder(e)
-    if !(new_tkr isa AbstractTokenizer)
-        new_tkr = TextTokenizer(new_tkr)
-    end
-    return setproperty!!(e, :tokenizer, new_tkr)
-end
-
-"""
-    set_vocab(builder, e::TrfTextEncoder)
-
-Return a new text encoder with the `vocab` field replaced with `builder(e)`. `builder` can either return
- a `AbstractVocabulary{String}` or a `AbstractVector{String}`.
-"""
-function set_vocab(builder, e::TrfTextEncoder)
-    new_vocab = builder(e)
-    if !(new_vocab isa AbstractVocabulary)
-        new_vocab = Vocab(new_vocab, e.vocab.unk)
-    end
-    return TrfTextEncoder(
-        getfield(e, :tokenizer), new_vocab, getfield(e, :config),
-        getfield(e, :annotate), getfield(e, :process), getfield(e, :onehot),
-        getfield(e, :decode), getfield(e, :textprocess))
-end
-
-TrfTextEncoder(builder, e::TrfTextEncoder) = set_process(builder, e)
-
 function Base.getproperty(e::TrfTextEncoder, sym::Symbol)
     if hasfield(TrfTextEncoder, sym)
         return getfield(e, sym)
@@ -208,9 +137,6 @@ end
 
 TransformerTextEncoder(tokenizef, v::WList, args...; kws...) =
     TransformerTextEncoder(WordTokenization(tokenize=tokenizef), v, args...; kws...)
-TransformerTextEncoder(v::WList, args...; kws...) = TransformerTextEncoder(TextTokenizer(), v, args...; kws...)
-TransformerTextEncoder(t::AbstractTokenization, v::WList, args...; kws...) =
-    TransformerTextEncoder(TextTokenizer(t), v, args...; kws...)
 
 TransformerTextEncoder(tkr::AbstractTokenizer, v::WList, args...; kws...) =
     throw(MethodError(TransformerTextEncoder, (tkr, v, args...)))
@@ -233,29 +159,3 @@ function TransformerTextEncoder(tkr::AbstractTokenizer, vocab::AbstractVocabular
     check_vocab(vocab, padsym) || @warn "padsym $padsym not in vocabulary, this might cause problem."
     return TransformerTextEncoder(tkr, vocab, process, startsym, endsym, padsym, trunc)
 end
-
-function TransformerTextEncoder(tkr::AbstractTokenizer, v::WList;
-                                fixedsize = false, trunc_end = :tail, pad_end = :tail, kws...)
-    enc = TransformerTextEncoder(tkr, v, identity; kws...)
-    # default processing pipeline
-    return TransformerTextEncoder(enc) do e
-        truncf = get_trunc_pad_func(e.padsym, fixedsize, e.trunc, trunc_end, pad_end)
-        maskf = get_mask_func(e.trunc, :tail)
-        # get token and convert to string
-        Pipeline{:token}(nestedcall(string_getvalue), 1) |>
-            # add start & end symbol
-            Pipeline{:token}(with_head_tail(e.startsym, e.endsym), :token) |>
-            # get mask with specific length
-            Pipeline{:attention_mask}(maskf, :token) |>
-            # truncate input that exceed length limit and pad them to have equal length
-            Pipeline{:token}(truncf, :token) |>
-            # convert to dense array
-            Pipeline{:token}(nested2batch, :token) |>
-            # sequence mask
-            Pipeline{:sequence_mask}(identity, :attention_mask) |>
-            # return token and mask
-            PipeGet{(:token, :attention_mask, :sequence_mask)}()
-    end
-end
-
-TransformerTextEncoder(builder, e::TrfTextEncoder) = TrfTextEncoder(builder, e)

@@ -29,19 +29,11 @@ using RDKitMinimalLib: get_mol, get_smiles
 
 using Lux, NNlib
 
-# External packages
-using BangBang, Tricks, FuncPipelines, StructWalk
-using OneHotArrays: OneHotArray
-
 # Text processing packages
 using TextEncodeBase
 using TextEncodeBase: WordTokenization, nested2batch, nestedcall, with_head_tail, tokenize, join_text,
-    trunc_and_pad, trunc_or_pad, Batch, Sentence, Document, peek_sequence_sample_type,
-    BaseTokenization, WrappedTokenization, MatchTokenization, Splittable, CodeNormalizer,
-    CodeMap, CodeUnMap, ParentStages, TokenStages, SentenceStage, SubSentenceStage,
-    WordStage, SubWordStage, TokenStage, DocumentStage, getvalue, getmeta,
-    SequenceTemplate, ConstTerm, InputTerm, RepeatedTerm, AbstractTokenizer, AbstractTokenization,
-    EachMatchTokenization, EachSplitTokenization, MatchSplitsTokenization, RuRegex
+    trunc_and_pad, trunc_or_pad, Batch, Sentence, peek_sequence_sample_type,
+    ParentStages, SentenceStage, TokenStage, getvalue, AbstractTokenizer, AbstractTokenization
 
 # Neural attention library
 using NeuralAttentionlib: LengthMask, RevLengthMask
