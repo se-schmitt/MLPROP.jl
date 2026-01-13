@@ -16,23 +16,6 @@ end
 TrfTextEncoder(tokenizer::AbstractTokenizer, vocab::AbstractVocabulary{String}, annotate, process, onehot; kws...) =
     TrfTextEncoder(tokenizer, vocab, values(kws), annotate, process, onehot)
 
-for name in fieldnames(TrfTextEncoder)
-    (name == :tokenizer || name == :vocab) && continue
-    @eval $(quote
-        """
-            set_$($(QuoteNode(name)))(builder, e::TrfTextEncoder)
-
-        Return a new text encoder with the `$($(QuoteNode(name)))` field replaced with `builder(e)`.
-        """
-        function $(Symbol(:set_, name))(builder, e::TrfTextEncoder)
-            setproperty!!(e, $(QuoteNode(name)), builder(e))
-        end
-    end)
-end
-
-
-TrfTextEncoder(builder, e::TrfTextEncoder) = set_process(builder, e)
-
 function Base.getproperty(e::TrfTextEncoder, sym::Symbol)
     if hasfield(TrfTextEncoder, sym)
         return getfield(e, sym)
@@ -95,5 +78,5 @@ function TransformerTextEncoder(tokenizef, words; trunc = nothing, startsym = "<
             PipeGet{(:token, :attention_mask, :sequence_mask)}()
     end
 
-    return TrfTextEncoder(builder, enc)
+    return setproperty!!(enc, :process, builder(enc))
 end
