@@ -1,10 +1,8 @@
-abstract type AbstractTransformerTextEncoder <: AbstractTextEncoder end
-
 struct TransformerTextEncoder{
     T <: AbstractTokenizer,
     V <: AbstractVocabulary{String},
     C, A, EP, OP
-} <: AbstractTransformerTextEncoder
+} <: AbstractTextEncoder
     tokenizer::T
     vocab::V
     config::C

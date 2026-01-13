@@ -1,8 +1,5 @@
 string_getvalue(x::TextEncodeBase.TokenStage) = String(getvalue(x))::String
 
-# check word is inside the vocab or not
-check_vocab(vocab::Vocab, word) = findfirst(==(word), vocab.list) !== nothing
-
 # get length of each sentences
 getlengths(maxlength) = TextEncodeBase.FixRest(getlengths, maxlength)
 function getlengths(x, maxlength)
@@ -34,8 +31,6 @@ function __getlength(maxlength, x)
 end
 
 # function factory for truncation / padding
-get_trunc_pad_func(fixedsize, trunc, trunc_end, pad_end) =
-    TextEncodeBase.FixRest(get_trunc_pad_func, fixedsize, trunc, trunc_end, pad_end)
 function get_trunc_pad_func(padsym, fixedsize, trunc, trunc_end, pad_end)
     if fixedsize
         @assert !isnothing(trunc) "`fixedsize=true` but `trunc` is not set."
