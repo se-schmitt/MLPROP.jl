@@ -1,6 +1,6 @@
 abstract type AbstractTransformerTextEncoder <: AbstractTextEncoder end
 
-struct TrfTextEncoder{
+struct TransformerTextEncoder{
     T <: AbstractTokenizer,
     V <: AbstractVocabulary{String},
     C, A, EP, OP
@@ -13,11 +13,11 @@ struct TrfTextEncoder{
     onehot::OP
 end
 
-TrfTextEncoder(tokenizer::AbstractTokenizer, vocab::AbstractVocabulary{String}, annotate, process, onehot; kws...) =
-    TrfTextEncoder(tokenizer, vocab, values(kws), annotate, process, onehot)
+TransformerTextEncoder(tokenizer::AbstractTokenizer, vocab::AbstractVocabulary{String}, annotate, process, onehot; kws...) =
+    TransformerTextEncoder(tokenizer, vocab, values(kws), annotate, process, onehot)
 
-function Base.getproperty(e::TrfTextEncoder, sym::Symbol)
-    if hasfield(TrfTextEncoder, sym)
+function Base.getproperty(e::TransformerTextEncoder, sym::Symbol)
+    if hasfield(TransformerTextEncoder, sym)
         return getfield(e, sym)
     else
         return getfield(e, :config)[sym]
@@ -26,14 +26,14 @@ end
 
 @inline _membercall(f, e, x) = !(f isa Pipelines) && static_hasmethod(f, Tuple{typeof(e), typeof(x)}) ? f(e, x) : f(x)
 
-TextEncodeBase.tokenize(e::TrfTextEncoder, x) = getfield(e, :tokenizer)(_membercall(getfield(e, :annotate), e, x))
-TextEncodeBase.process(e::TrfTextEncoder, x) = _membercall(getfield(e, :process), e, x)
-TextEncodeBase.lookup(e::TrfTextEncoder, x) = _membercall(getfield(e, :onehot), e, x)
-TextEncodeBase.onehot_encode(e::TrfTextEncoder, x) = lookup(OneHot, getfield(e, :vocab), x)
+TextEncodeBase.tokenize(e::TransformerTextEncoder, x) = getfield(e, :tokenizer)(_membercall(getfield(e, :annotate), e, x))
+TextEncodeBase.process(e::TransformerTextEncoder, x) = _membercall(getfield(e, :process), e, x)
+TextEncodeBase.lookup(e::TransformerTextEncoder, x) = _membercall(getfield(e, :onehot), e, x)
+TextEncodeBase.onehot_encode(e::TransformerTextEncoder, x) = lookup(OneHot, getfield(e, :vocab), x)
 
 annotate_strings(x::AbstractString) = Sentence(x)
 
-function lookup_first(e::TrfTextEncoder, x::NamedTuple{name}) where name
+function lookup_first(e::TransformerTextEncoder, x::NamedTuple{name}) where name
     xt = Tuple(x)
     return NamedTuple{name}((TextEncodeBase.onehot_encode(e, xt[1]), Base.tail(xt)...))
 end
@@ -50,7 +50,7 @@ function TransformerTextEncoder(tokenizef, words; trunc = nothing, startsym = "<
         sym ∉ vocab_list && push!(vocab_list, sym)
     end
     vocab = Vocab(vocab_list, unksym)
-    enc = TrfTextEncoder(
+    enc = TransformerTextEncoder(
         tkr, vocab,
         @NamedTuple{startsym::String, endsym::String, padsym::String, trunc::Union{Nothing, Int}}(
             (startsym, endsym, padsym, trunc)),
