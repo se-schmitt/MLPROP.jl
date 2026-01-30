@@ -1,5 +1,5 @@
 # Load tokenizer
-function load_tokenizer(config::Dict)
+function load_tokenizer(config::AbstractDict)
     path_vocab_json = joinpath(DATADIR, "vocab.json")
     vocab = JSON.parsefile(path_vocab_json)
     idx_sort = sortperm(collect(values(vocab)))
