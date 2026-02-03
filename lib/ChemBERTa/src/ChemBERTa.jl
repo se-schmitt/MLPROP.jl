@@ -26,23 +26,21 @@ module ChemBERTa
 
 CANONICALIZE_COUNT = 0
 
-using DataStructures, ConcreteStructs, JSON, Random, SafeTensors
+using DataStructures: OrderedDict
+using ConcreteStructs, JSON, Random, SafeTensors
 
 using Lux, NNlib
 
 # External packages
-using BangBang, Tricks, FuncPipelines, StructWalk
-using OneHotArrays: OneHotArray
+using BangBang: setproperty!!
+using Tricks: static_hasmethod
+using FuncPipelines: Pipeline, Pipelines, PipeGet
 
 # Text processing packages
-using TextEncodeBase
-using TextEncodeBase: WordTokenization, nested2batch, nestedcall, with_head_tail, tokenize, join_text,
-    trunc_and_pad, trunc_or_pad, Batch, Sentence, Document, peek_sequence_sample_type,
-    BaseTokenization, WrappedTokenization, MatchTokenization, Splittable, CodeNormalizer,
-    CodeMap, CodeUnMap, ParentStages, TokenStages, SentenceStage, SubSentenceStage,
-    WordStage, SubWordStage, TokenStage, DocumentStage, getvalue, getmeta,
-    SequenceTemplate, ConstTerm, InputTerm, RepeatedTerm, AbstractTokenizer, AbstractTokenization,
-    EachMatchTokenization, EachSplitTokenization, MatchSplitsTokenization, RuRegex
+import TextEncodeBase
+using TextEncodeBase: AbstractTextEncoder, AbstractTokenizer, AbstractTokenization, AbstractVocabulary,
+    OneHot, Sentence, Vocab, WordTokenization, encode, getvalue, lookup, nested2batch, nestedcall,
+    peek_sequence_sample_type, trunc_and_pad, trunc_or_pad, with_head_tail
 
 # Neural attention library
 using NeuralAttentionlib: LengthMask, RevLengthMask
