@@ -1,4 +1,4 @@
-using ChemBERTa, DelimitedFiles
+using ChemBERTa, DelimitedFiles, RDKitMinimalLib
 
 @testset "ChemBERTa" begin
     # SMILES to test
@@ -11,7 +11,7 @@ using ChemBERTa, DelimitedFiles
     # Loading the ChemBERTa model
     bert = ChemBERTa.load()
 
-    # Calculating the embedding for a given SMILES
+    # Calculating the embedding for a given SMILES and compare to Python reference
     for smiles in smiles_list
         embedding = bert(smiles)
         embedding_ref = readdlm("data/$(smiles).csv", Float32)[:]

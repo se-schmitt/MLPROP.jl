@@ -24,8 +24,9 @@ See XY for details.
 """
 module ChemBERTa
 
+CANONICALIZE_COUNT = 0
+
 using DataStructures, ConcreteStructs, JSON, Random, SafeTensors
-using RDKitMinimalLib: get_mol, get_smiles
 
 using Lux, NNlib
 

@@ -129,7 +129,7 @@ struct ChemBERTaModel
 end
 function (model::ChemBERTaModel)(smiles::AbstractString)
     # Canonicalize smiles
-    _smiles = get_smiles(get_mol(smiles))
+    _smiles = canonicalize(smiles)
 
     # tokenizer
     enc = encode(model.tokenizer.encoder, _smiles)

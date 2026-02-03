@@ -71,3 +71,15 @@ setpath!(Y::AbstractArray, path::Tuple, value) = begin
     Y .= reshape(value, sz_Y)
     return nothing
 end
+
+function canonicalize(smiles)
+    if CANONICALIZE_COUNT == 0
+        global CANONICALIZE_COUNT += 1
+        @warn("""
+        SMILES are not canonicalized by `MLPROP.jl`!
+        Either ensure that the used SMILES are canonicalized or load `RDKitMinimalLib.jl` (not working on Windows).
+        """)
+    end
+
+    return smiles
+end
