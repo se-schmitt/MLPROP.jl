@@ -1,4 +1,4 @@
-using ChemBERTa, DelimitedFiles, RDKitMinimalLib
+using ChemBERTa, DelimitedFiles
 
 @testset "ChemBERTa" begin
     # SMILES to test
@@ -7,6 +7,26 @@ using ChemBERTa, DelimitedFiles, RDKitMinimalLib
         "C1=CC=C(C=C1)C2=C(C3=C(C(=NNC3=O)[O-])C(=N2)Cl)N.[Na+]",
         "CC[Hg]N1C(=O)C2C(C1=O)C3(C(=C(C2(C3(Cl)Cl)Cl)Cl)Cl)Cl",
     ]
+    canonical_smiles = [
+        "CC(=O)Oc1ccccc1C(=O)O"
+        "Nc1c(-c2ccccc2)nc(Cl)c2c([O-])n[nH]c(=O)c12.[Na+]"
+        "CC[Hg]N1C(=O)C2C(C1=O)C1(Cl)C(Cl)=C(Cl)C2(Cl)C1(Cl)Cl"
+    ]
+
+    # Test canonization
+    @testset "RDKitMinimalLibExt" begin
+        using RDKitMinimalLib
+        for i in eachindex(smiles_list)
+            @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
+        end
+    end
+
+    @testset "PythonCall" begin
+        using PythonCall
+        for i in eachindex(smiles_list)
+            @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
+        end
+    end
 
     # Loading the ChemBERTa model
     bert = ChemBERTa.load()
