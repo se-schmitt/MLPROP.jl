@@ -1,0 +1,35 @@
+[project]
+name = "grappa"
+version = "0.1.0"
+description = "GRAPPA model to be used in MLPROP.jl"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "rdkit==2024.9.4",
+    "torch>=2.10.0",
+    "torch-geometric>=2.7.0",
+    "importlib-resources>=5.0; python_version<'3.9'",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+"*" = ["data/*.pt"]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+  { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

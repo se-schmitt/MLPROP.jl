@@ -1,0 +1,44 @@
+name = "ChemBERTa"
+uuid = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
+version = "1.0.0-DEV"
+authors = ["se-schmitt <se.s.schmitt@gmail.com>"]
+
+[deps]
+BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
+ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+FuncPipelines = "9ed96fbb-10b6-44d4-99a6-7e2a3dc8861b"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
+NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
+NeuralAttentionlib = "12afc1b8-fad6-47e1-9132-84abc478905f"
+OneHotArrays = "0b1bfda6-eb8a-41d2-88d8-f5af5cad476f"
+RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SafeTensors = "eeda0dda-7046-4914-a807-2495fc7abb89"
+StructWalk = "31cdf514-beb7-4750-89db-dda9d2eb8d3d"
+TextEncodeBase = "f92c20c0-9f2a-4705-8116-881385faba05"
+Tricks = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+
+[weakdeps]
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
+
+[extensions]
+RDKitMinimalLibExt = "RDKitMinimalLib"
+PythonCallExt = "PythonCall"
+
+[compat]
+BangBang = "0.4.6"
+ConcreteStructs = "0.2.3"
+FuncPipelines = "0.2.3"
+Lux = "1"
+NNlib = "0.9.32"
+NeuralAttentionlib = "0.3.3"
+OneHotArrays = "0.2.10"
+RDKitMinimalLib = "1.2.0"
+Random = "1.11.0"
+SafeTensors = "1.2.0"
+StructWalk = "0.2.1"
+TextEncodeBase = "0.8"
+Tricks = "0.1.13"

@@ -1,0 +1,12 @@
+[project]
+name = "data"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "rdkit==2024.9.4",
+    "tokenizers>=0.22.2",
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+]
