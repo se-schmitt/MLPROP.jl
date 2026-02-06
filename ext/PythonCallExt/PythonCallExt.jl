@@ -4,9 +4,13 @@ using MLPROP
 using PythonCall
 const CL = MLPROP.Clapeyron
 
+const chem = Ref{Py}()
+const desc = Ref{Py}()
 const grappa = Ref{Py}()
   
 function __init__()
+    chem[] = pyimport("rdkit.Chem")
+    desc[] = pyimport("rdkit.Chem.Descriptors")
     grappa[] = pyimport("grappa")
 
     MLPROP._GRAPPA[] = _GRAPPA_python
@@ -35,5 +39,21 @@ function _GRAPPA_python(components; userlocations, reference_state, verbose)
 
     return GRAPPA(components, params, references)
 end
+
+# Get descriptors
+function MLPROP.get_descriptors(smiles::AbstractString)
+    mol = chem[].MolFromSmiles(smiles)
+    descs = Dict(
+        "exactmw" => pyconvert(Float64, desc[].ExactMolWt(mol)),
+        "NumRings" => pyconvert(Int64, desc[].RingCount(mol)),
+        "NumHeteroatoms" => pyconvert(Int64, desc[].NumHeteroatoms(mol)),
+        "NumHeavyAtoms" => pyconvert(Int64, desc[].HeavyAtomCount(mol)),
+        "NumHBA" => pyconvert(Int64, desc[].NumHAcceptors(mol)),
+        "NumHBD" => pyconvert(Int64, desc[].NumHDonors(mol)),
+        "NumHalogens" => pyconvert(Int64, desc[].fr_halogen(mol)),
+    )
+    return isnothing(mol) ? nothing : descs
+end
+
 
 end

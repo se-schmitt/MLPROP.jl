@@ -26,13 +26,7 @@ end
 
 function r_hal(SMILES::String,descs::Dict)
     #Calculating ratio of halogenatoms to heavy atoms of given molecule
-    mol = get_mol(SMILES)
-    N_h=0
-    for h in ["F", "Cl", "Br", "I"] # , "At", "Ts"]
-       qmol = get_qmol(h)
-       N_h += length(get_substruct_matches(mol, qmol))
-    end
-    return N_h/get(descs,"NumHeavyAtoms",0)
+    return descs["NumHalogens"]/get(descs,"NumHeavyAtoms",0)
 end
 
 struct SEBParam
@@ -72,8 +66,7 @@ function SEB(SMILE_i::String,SMILE_j::String,eta_fun)
     nn_parameters = load(path_nn_parameters)["Weights_Bias_SEB"]
     
     #Processing SMILES to get molecular descriptors used in neural net
-    mol_i,mol_j = get_mol(SMILE_i), get_mol(SMILE_j)
-    desc_i,desc_j = get_descriptors(mol_i), get_descriptors(mol_j)
+    desc_i,desc_j = get_descriptors(SMILE_i), get_descriptors(SMILE_j)
   
     X_i_ini=[M(desc_i);r_acc(desc_i);r_don(desc_i);r_het(desc_i); r_hal(SMILE_i,desc_i);R(desc_i)]
     X_j_ini=[M(desc_j);r_acc(desc_j);r_don(desc_j);r_het(desc_j); r_hal(SMILE_j,desc_j);R(desc_j)]

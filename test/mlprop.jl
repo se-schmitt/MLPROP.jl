@@ -28,6 +28,8 @@ using MLPROP, Clapeyron, PythonCall, JLD2
 
     #TODO revise tests
     @testset "SEB" begin
+        p_iso = 1e5
+        
         validation_data=Dict(
         [
         ("299.16",[1.6482543537961485;0.931919139410536;2.2720926704344366;2.1565516995619975]),

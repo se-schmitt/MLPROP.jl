@@ -3,3 +3,4 @@ python = "<=3.13,>=3.9,<4"
 
 [pip.deps]
 grappa = "@ ./ext/PythonCallExt/grappa"
+rdkit = "~= 2024.09.4"
