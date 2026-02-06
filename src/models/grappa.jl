@@ -73,9 +73,14 @@ function GRAPPA(components; userlocations = String[], reference_state = nothing,
     _GRAPPA[](components; userlocations, reference_state, verbose)
 end
 
-function CL.crit_pure(model::GRAPPAModel)
+function CL.crit_pure(model::GRAPPAModel{_T}) where _T
     CL.single_component_check(crit_pure,model)
-    Tc = only(model.params.Tc.values)
+    if only(model.params.Tc.ismissingvalues)
+        nan = zero(_T)/zero(_T)
+        return nan,nan,nan
+    else
+        Tc = only(model.params.Tc.values)
+    end
     Pc, _, _ = saturation_pressure(model, Tc)
     return (Tc,Pc,NaN)
 end

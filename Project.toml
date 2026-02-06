@@ -13,11 +13,11 @@ Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 
-[extensions]
-PythonCallExt = "PythonCall"
-
 [sources]
 ChemBERTa = {path = "lib/ChemBERTa"}
+
+[extensions]
+PythonCallExt = "PythonCall"
 
 [compat]
 Clapeyron = "0.6.14"
@@ -27,10 +27,11 @@ julia = "1.11"
 
 [extras]
 ChemBERTa = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
+Clapeyron = "7c7805af-46cc-48c9-995b-ed0ed2dc909a"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ChemBERTa", "DelimitedFiles", "RDKitMinimalLib", "PythonCall"]
+test = ["Test", "ChemBERTa", "DelimitedFiles", "RDKitMinimalLib", "PythonCall", "Clapeyron"]
