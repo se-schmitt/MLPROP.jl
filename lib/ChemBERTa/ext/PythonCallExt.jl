@@ -6,7 +6,7 @@ using PythonCall
 const chem = Ref{Py}()
   
 function __init__()
-    if Base.get_extension(Main.ChemBERTa, :RDKitMinimalLibExt) isa Module
+    if isdefined(Main, :ChemBERTa) && Base.get_extension(Main.ChemBERTa, :RDKitMinimalLibExt) isa Module
         @warn """
         Function `ChemBERTa.canonicalize` defined by `PythonCallExt` and `RDKitMinimalLibExt`!
         `PythonCallExt` is used.
