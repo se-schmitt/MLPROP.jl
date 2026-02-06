@@ -4,7 +4,6 @@ using Clapeyron, Lux, ConcreteStructs, ChemBERTa
 
 const CL = Clapeyron
 
-# Models
-
+include("models/models.jl")
 
 end
