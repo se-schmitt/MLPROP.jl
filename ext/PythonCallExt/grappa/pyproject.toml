@@ -23,10 +23,10 @@ package-dir = {"" = "src"}
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu" },
+  { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
 ]
 torchvision = [
-  { index = "pytorch-cpu" },
+  { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
 ]
 
 [[tool.uv.index]]
