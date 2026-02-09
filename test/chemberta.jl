@@ -36,7 +36,7 @@ using ChemBERTa, DelimitedFiles
     # Calculating the embedding for a given SMILES and compare to Python reference
     for smiles in smiles_list
         embedding = bert(smiles)
-        embedding_ref = readdlm("data/$(smiles).csv", Float32)[:]
+        embedding_ref = readdlm("data/chemberta_py/$(smiles).csv", Float32)[:]
         @test all((≈).(embedding, embedding_ref; atol=1f-5))
     end
 end
