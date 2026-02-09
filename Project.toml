@@ -11,6 +11,7 @@ JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 
 [weakdeps]
+EntropyScaling = "36a13073-9e6e-4b19-b12b-cb530e79ee8e"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 
@@ -18,6 +19,7 @@ RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 ChemBERTa = {path = "lib/ChemBERTa"}
 
 [extensions]
+EntropyScalingExt = "EntropyScaling"
 PythonCallExt = "PythonCall"
 
 [compat]
