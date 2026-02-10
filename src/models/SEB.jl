@@ -82,6 +82,7 @@ end
 
 Base.broadcastable(x::SEB) = Ref(x)
 
+#TODO use functions from EntropyScaling
 """
 Diffusion
 Diffusion calculates the diffusioncoefficent, using the Stokes-Einstein-equation and multiplying 
