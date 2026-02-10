@@ -17,6 +17,8 @@ using ChemBERTa, DelimitedFiles
     if Sys.islinux()
         @testset "RDKitMinimalLibExt" begin
             using RDKitMinimalLib
+            module_canonicalize = only(methods(ChemBERTa._canonicalize[]).ms).module
+            @info "Uses `_canonicalize` from `$(module_canonicalize)`!"
             for i in eachindex(smiles_list)
                 @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
             end
@@ -25,6 +27,8 @@ using ChemBERTa, DelimitedFiles
 
     @testset "PythonCall" begin
         using PythonCall
+        module_canonicalize = only(methods(ChemBERTa._canonicalize[]).ms).module
+        @info "Uses `_canonicalize` from `$(module_canonicalize)`!"
         for i in eachindex(smiles_list)
             @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
         end
