@@ -72,12 +72,20 @@ setpath!(Y::AbstractArray, path::Tuple, value) = begin
     return nothing
 end
 
+# Canonicalization of smiles
+function _canonicalize_error(smiles)
+    @warn("""
+    SMILES are not canonicalized by `MLPROP.jl`!
+    Either ensure that the used SMILES are canonicalized or load `RDKitMinimalLib.jl` (not working on Windows).
+    """)
+    return smiles
+end
+
+const _canonicalize = Ref{Function}(_canonicalize_error)
+
 function canonicalize(smiles; is_canonical=false)
     if !is_canonical
-        @warn("""
-        SMILES are not canonicalized by `MLPROP.jl`!
-        Either ensure that the used SMILES are canonicalized or load `RDKitMinimalLib.jl` (not working on Windows).
-        """)
+        smiles = _canonicalize[](smiles)
     end
     return smiles
 end

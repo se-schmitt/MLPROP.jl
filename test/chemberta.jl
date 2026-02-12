@@ -1,4 +1,9 @@
-using ChemBERTa, DelimitedFiles
+using ChemBERTa, DelimitedFiles, PythonCall
+CB_PyExt = Base.get_extension(ChemBERTa, :PythonCallExt)
+if Sys.islinux()
+    using RDKitMinimalLib
+    CB_RDKExt = Base.get_extension(ChemBERTa, :RDKitMinimalLibExt)
+end
 
 @testset "ChemBERTa" begin
     # SMILES to test
@@ -16,17 +21,23 @@ using ChemBERTa, DelimitedFiles
     # Test canonization
     if Sys.islinux()
         @testset "RDKitMinimalLibExt" begin
-            using RDKitMinimalLib
             for i in eachindex(smiles_list)
-                @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
+                @test CB_RDKExt._canonicalize_rdk(smiles_list[i]) == canonical_smiles[i]
             end
         end
     end
 
-    @testset "PythonCall" begin
-        using PythonCall
+    @testset "PythonCallExt" begin
         for i in eachindex(smiles_list)
-            @test ChemBERTa.canonicalize.(smiles_list[i]) == canonical_smiles[i]
+            @test CB_PyExt._canonicalize_py(smiles_list[i]) == canonical_smiles[i]
+        end
+    end
+
+    @testset "Canonicalization" begin
+        module_canonicalize = only(methods(ChemBERTa._canonicalize[]).ms).module
+        @info "Uses `_canonicalize` from `$(module_canonicalize)`!"
+        for i in eachindex(smiles_list)
+            @test ChemBERTa.canonicalize(smiles_list[i]) == canonical_smiles[i]
         end
     end
 

@@ -4,3 +4,5 @@ scripts
 __pycache__
 .venv
 .CondaPkg
+*.egg-info
+build
