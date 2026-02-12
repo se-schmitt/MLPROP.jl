@@ -214,3 +214,5 @@ function CL.excess_gibbs_free_energy(model::HANNA, p, T, z)
     end
     return gE * Rgas(model) * T * sum(z)
 end
+
+export HANNA
