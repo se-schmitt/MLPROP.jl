@@ -6,17 +6,17 @@ import numpy as np
 import os
 import sys
 import types  
-
-current_script_path = os.path.dirname(os.path.abspath(__file__))
-dependency_folder = os.path.join(current_script_path, "Python_HANNA_legacy")
-if dependency_folder not in sys.path:
-    sys.path.append(dependency_folder)
-
-sys.modules['utils'] = types.ModuleType('utils')
+from Utils import predict, create_embedding_matrix
 from chemberta_utils import initialize_ChemBERTA
 import Own_Scaler
-sys.modules['utils.Own_Scaler'] = Own_Scaler
-from Utils import predict, create_embedding_matrix
+
+def register_pickle_compat_aliases():
+    """Provide legacy module aliases required by the stored scaler pickle."""
+    utils_module = types.ModuleType('utils')
+    utils_module.Own_Scaler = types.ModuleType('Own_Scaler')
+    utils_module.Own_Scaler.CustomScaler = Own_Scaler.CustomScaler
+    sys.modules['utils'] = utils_module
+    sys.modules['utils.Own_Scaler'] = utils_module.Own_Scaler
 
 # HANNA Model
 class HANNA(nn.Module):
@@ -74,41 +74,74 @@ class HANNA(nn.Module):
 
         return ln_gammas, gE
 
-# Paths for model and scaler
-current_script_folder = os.path.dirname(os.path.abspath(__file__))
-data_folder = os.path.join(current_script_folder, "Python_HANNA_legacy")
+def load_model_and_scaler(base_dir, device):
+    model_path = os.path.join(base_dir, "HANNA_legacy_Val.pt")
+    scaler_path = os.path.join(base_dir, "scalerHANNA_legacy_Val.pkl")
 
-model_path = os.path.join(data_folder, "HANNA_legacy_Val.pt")
-scaler_path = os.path.join(data_folder, "scalerHANNA_legacy_Val.pkl")
-# Load the model
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = HANNA().to(device)
-model.load_state_dict(torch.load(model_path, map_location=device))
-# Set the model to evaluation mode
-model.eval()
-# Load the scaler
-with open(scaler_path, 'rb') as f:
-    scaler = pickle.load(f)
+    model = HANNA().to(device)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.eval()
 
-# Initialize ChemBERTa
-ChemBERTA, tokenizer = initialize_ChemBERTA(model_name="DeepChem/ChemBERTa-77M-MTR", device=None)
+    register_pickle_compat_aliases()
+    with open(scaler_path, 'rb') as f:
+        scaler = pickle.load(f)
 
-# Example usage with ethanol and water at 300 K:
-SMILES_1 = "O" # SMILES of component 1 (water)
-SMILES_2 = "CCO" # SMILES of component 2 (ethanol)
-T = 300 # Temperature in K
-x1_values = np.array([0.5]) # Mole fraction(s) of component 1
+    return model, scaler
 
-embedding_matrix =create_embedding_matrix(SMILES_1, SMILES_2, T, device, ChemBERTA, tokenizer, x1_values) # Create the embedding matrix
-x_pred, ln_gammas_pred = predict(embedding_matrix, scaler, model, device) # Predict the logarithmic activity coefficients
 
-# Results
-ln_g1 = ln_gammas_pred[0, 0] # First Component
-ln_g2 = ln_gammas_pred[0, 1] # Second Component
+def predict_binary_system(smiles_1, smiles_2, temperature, x1, model, scaler, chemberta_model, tokenizer, device):
+    x1_values = np.array([x1], dtype=float)
+    embedding_matrix = create_embedding_matrix(
+        smiles_1,
+        smiles_2,
+        temperature,
+        device,
+        chemberta_model,
+        tokenizer,
+        x1_values,
+    )
+    _, ln_gammas_pred = predict(embedding_matrix, scaler, model, device)
+    gamma_1 = float(np.exp(ln_gammas_pred[0, 0]))
+    gamma_2 = float(np.exp(ln_gammas_pred[0, 1]))
+    return gamma_1, gamma_2
 
-g1 = np.exp(ln_g1)
-g2 = np.exp(ln_g2)
 
-print(f"REFERENCE (PYTHON ORIGINAL (HANNA_LEGACY)):")
-print(f"Gamma First Comp.:  {g1:.6f}")
-print(f"Gamma Second Comp: {g2:.6f}")
+def main():
+    current_script_folder = os.path.dirname(os.path.abspath(__file__))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model, scaler = load_model_and_scaler(current_script_folder, device)
+    chemberta_model, tokenizer = initialize_ChemBERTA(device=device)
+
+    # Define systems as [["SMILES1", "SMILES2"], ["S1", "S2"], ...]
+    systems = [
+        ["O", "CCO"],
+        ["CC(=O)O", "O"],
+        ["CC", "CCC"],
+    ]
+
+    temperature = 300.0
+    x1 = 0.5
+
+    print("REFERENCE (PYTHON ORIGINAL (HANNA_LEGACY))")
+    print(f"T = {temperature} K, x1 = {x1}")
+
+    for smiles_1, smiles_2 in systems:
+        gamma_1, gamma_2 = predict_binary_system(
+            smiles_1,
+            smiles_2,
+            temperature,
+            x1,
+            model,
+            scaler,
+            chemberta_model,
+            tokenizer,
+            device,
+        )
+        print(f"System: [{smiles_1}] + [{smiles_2}]")
+        print(f"  Gamma First Comp.:  {gamma_1:.6f}")
+        print(f"  Gamma Second Comp: {gamma_2:.6f}")
+
+
+if __name__ == "__main__":
+    main()
