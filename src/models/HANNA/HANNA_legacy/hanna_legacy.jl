@@ -1,96 +1,12 @@
-# Help Functions ---------------------------------------------------------------------------
-silu(x) = @. x/(1+exp(-x))
+abstract type HANNAModel <: CL.ActivityModel end
 
-struct TScaler <: Function
-    u::Float64
-    sk::Float64
-end
-
-function (t::TScaler)(x)
-    (x - t.u) / t.sk
-end
-
-struct EmbeddedScaler{D} <: Function
-    u::D
-    s::D
-    k::D
-end
-
-function (t::EmbeddedScaler)(x)
-    (x .- @view(t.u[2:end])) ./  @view(t.s[2:end]) .*  @view(t.k[2:end])
-end
-
-function load_scalers()
-    db_path = joinpath(@__DIR__, "data", "scaler")
-    path = joinpath(db_path, "scaler.csv")
-    data = CSV.File(path; header=1) |> CSV.Tables.matrix
-    (u,s,k) = [data[:,i][:] for i in 1:3]
-    T_scaler = TScaler(u[1],s[1]/k[1])
-    emb_scaler = EmbeddedScaler(u,s,k)
-    return T_scaler, emb_scaler
-end
-
-function cosine_similarity(x1,x2;eps=1e-8)
-    ∑x1 = sqrt(dot(x1,x1))
-    ∑x2 = sqrt(dot(x2,x2))
-    return dot(x1,x2)/(max(∑x1,eps*one(∑x1))*max(∑x2,eps*one(∑x2)))
-end
-
-struct LuxNetwork
-    model::Lux.AbstractLuxLayer
-    ps::NamedTuple
-    st::NamedTuple
-end
-
-function build_lux_dense(in_d, out_d, path_w, path_b)
-    rng = Random.default_rng()
-    model = Dense(in_d, out_d, silu)
-    ps, st = Lux.setup(rng, model)
-    
-    # Laden & Konvertieren zu Float64 (Thermodynamik braucht Präzision!)
-    w = CSV.File(path_w; header=0) |> CSV.Tables.matrix
-    b = vec(readdlm(path_b, ',', Float64))
-    
-    # Wir erstellen ein neues NamedTuple für die Parameter
-    ps_loaded = (weight=Float64.(w), bias=Float64.(b))
-    
-    return LuxNetwork(model, ps_loaded, st)
-end
-
-function build_lux_chain(layers, paths_w, paths_b)
-    rng = Random.default_rng()
-    model = Chain(layers...)
-    ps, st = Lux.setup(rng, model)
-    
-    ps_dict = Dict{Symbol, Any}()
-    
-    for (i, (pw, pb)) in enumerate(zip(paths_w, paths_b))
-        w = CSV.File(pw; header=0) |> CSV.Tables.matrix
-        b = vec(readdlm(pb, ',', Float64))
-        key = Symbol("layer_$i")
-        ps_dict[key] = (weight=Float64.(w), bias=Float64.(b))
-    end
-    
-    keys_sorted = sort(collect(keys(ps_dict)))
-    vals_sorted = [ps_dict[k] for k in keys_sorted]
-    ps_loaded = NamedTuple{Tuple(keys_sorted)}(Tuple(vals_sorted))
-
-    return LuxNetwork(model, ps_loaded, st)
-end
-
-# Help Functions - END------------------------------------------------------------
-
-# Parameter Structure
-struct HANNAParam <: CL.EoSParam
-    smiles::SingleParam{String}        
-    emb_scaled::Vector{Vector{Float64}}
-    T_scaler::Function
-    # Lux architecture
-    theta::LuxNetwork
-    alpha::LuxNetwork
-    phi::LuxNetwork
-
-    Mw::SingleParam{Float64}            
+struct HANNAParam{T,P,S} <: CL.EoSParam
+    emb::Matrix{T}
+    scaler_T::AbstractScaler{T}
+    model::LuxHANNA
+    ps::P
+    st::S
+    Mw::SingleParam{T}
 end
 
 # Constants for Lux model
@@ -103,80 +19,109 @@ end
 
 function CL.each_split_model(param::HANNAParam, i)
     Mw = CL.each_split_model(param.Mw, i)
-    smiles = CL.each_split_model(param.smiles, i)
     
-    emb_subset = param.emb_scaled[i]
-    if !isa(emb_subset, Vector{Vector{Float64}})
-        emb_subset = [emb_subset]
-    end
+    emb_subset = param.emb_scaled[:,i:i]
 
-    return HANNAParam(smiles, emb_subset, param.T_scaler, 
-        param.theta, param.alpha, param.phi, Mw)
+    return HANNAParam(emb_subset, param.T_scaler, param.model, param.ps, param.st, Mw)
 end
 
-# Model definition
-abstract type HANNAModel <: CL.ActivityModel 
-end
-
-# Model Structure
-struct HANNA{c<:CL.EoSModel} <: HANNAModel
+struct HANNA{c<:CL.EoSModel,T,P,S} <: HANNAModel
     components::Array{String,1}
-    params::HANNAParam
+    params::HANNAParam{T,P,S}
     puremodel::CL.EoSVectorParam{c}
     references::Array{String,1}
 end
 
+"""
+    HANNA <: ActivityModel
+
+    HANNA(components;
+    puremodel = nothing,
+    userlocations = String[],
+    pure_userlocations = String[],
+    verbose = false,
+    reference_state = nothing)
+
+## Input parameters
+- `SMILES`: canonical SMILES (using RDKit) representation of the components
+- `Mw`: Single Parameter (`Float64`) (Optional) - Molecular Weight `[g·mol⁻¹]`
+
+## Input models
+- `puremodel`: model to calculate pure pressure-dependent properties
+
+## Description
+Hard-Constraint Neural Network for Consistent Activity Coefficient Prediction (HANNA v1.0.0).
+The implementation is based on [this](https://github.com/tspecht93/HANNA) Github repository.
+HANNA was trained on all available binary VLE data (up to 10 bar) and limiting activity coefficients from the Dortmund Data Bank. HANNA was only tested for binary mixtures so far. The extension to multicomponent mixtures is experimental.
+
+To use the model, the package `ClapeyronHANNA` must be installed and loaded (see example below).
+
+## Example
+```julia
+using MLPROP, Clapeyron
+
+components = ["water","isobutanol"]
+Mw = [18.01528, 74.1216]
+smiles = ["O", "CC(C)CO"]
+
+model = HANNA(components,userlocations=(;Mw=Mw, SMILWS=smiles))
+# model = HANNA(components) # also works if components are in the database 
+```
+
+## References
+1. Specht, T., Nagda, M., Fellenz, S., Mandt, S., Hasse, H., Jirasek, F., HANNA: Hard-Constraint Neural Network for Consistent Activity Coefficient Prediction. Chemical Science 2024. [10.1039/D4SC05115G](https://doi.org/10.1039/D4SC05115G).
+"""
+HANNA
+
 CL.default_locations(::Type{HANNA}) = ["properties/identifiers.csv", "properties/molarmass.csv"]
-# Main HANNA function --------------------------------------------
-function HANNA(components::Vector{String};
+get_model_path(::Type{HANNA}) = joinpath(DB_PATH, "HANNA_legacy")
+
+function HANNA(components;
         puremodel = BasicIdeal,
         userlocations = String[],
         pure_userlocations = String[],
         verbose = false,
-        reference_state = nothing)
-
-    DB_PATH = joinpath(@__DIR__, "data") 
-
-    # Get parameters (Mw and smiles)
-    params = CL.getparams(components,CL.default_locations(HANNA);userlocations=userlocations,ignore_headers=["dipprnumber","inchikey","cas"])
-
-    # Load ChemBERTa model
-    bert = ChemBERTa.load()
-    embs = Vector{Vector{Float64}}(undef, length(components))
-    loaded_smiles = params["canonicalsmiles"].values
-    for i in eachindex(components)
-        smi = loaded_smiles[i]
-        embs[i] = bert(smi)
-    end
+        reference_state = nothing
+)
+    _components = CL.format_components(components)
     
-    # Load scalers and scale embeddings
-    T_scaler, emb_scaler = load_scalers()
-    emb_scaled = emb_scaler.(embs)
+    _params = CL.getparams(components,CL.default_locations(HANNA);
+        userlocations,ignore_headers=["dipprnumber","inchikey","cas"], ignore_missing_singleparams=["canonicalsmiles"])
 
-    theta = build_lux_dense(N_EMB, N_NODES, 
-                            joinpath(DB_PATH, "HANNA", "theta_1_w.csv"), 
-                            joinpath(DB_PATH, "HANNA", "theta_1_b.csv"))
+    length(_components) > 2 && error("`HANNA` is not suited for multicomponent systems. Use `HANNA` instead.")
+    smiles = [
+        _params["canonicalsmiles"].ismissingvalues[i] ?
+        ChemBERTa.canonicalize.(_params["SMILES"].values[i]) :
+        _params["canonicalsmiles"].values[i]
+    for i in eachindex(_components)]
 
-    alpha = build_lux_chain(
-        [Dense(N_NODES + 2, N_NODES, silu), Dense(N_NODES, N_NODES, silu)],
-        [joinpath(DB_PATH, "HANNA", "alpha_1_w.csv"), joinpath(DB_PATH, "HANNA", "alpha_2_w.csv")],
-        [joinpath(DB_PATH, "HANNA", "alpha_1_b.csv"), joinpath(DB_PATH, "HANNA", "alpha_2_b.csv")]
+    # Create model
+    nn = LuxHANNA(
+        Dense(N_EMB, N_NODES, silu),
+        Chain(Dense(N_NODES + 2, N_NODES, silu), Dense(N_NODES, N_NODES, silu)),
+        Chain(Dense(N_NODES, N_NODES, silu), Dense(N_NODES, 1))
     )
+    
+    # Load model parameters and scalers
+    ps, st = load(joinpath(get_model_path(HANNA),"hanna_legacy.jld2"), "ps", "st")
+    scaler_T =   load_scaler(joinpath(get_model_path(HANNA), "scaler_T.jld2"))
+    scaler_emb = load_scaler(joinpath(get_model_path(HANNA), "scaler_emb.jld2"))
 
-    phi = build_lux_chain(
-        [Dense(N_NODES, N_NODES, silu), Dense(N_NODES, 1)],
-        [joinpath(DB_PATH, "HANNA", "phi_1_w.csv"), joinpath(DB_PATH, "HANNA", "phi_2_w.csv")],
-        [joinpath(DB_PATH, "HANNA", "phi_1_b.csv"), joinpath(DB_PATH, "HANNA", "phi_2_b.csv")]
-    )
+    # Calc embeddings
+    if isnothing(BERT)
+        global BERT = ChemBERTa.load()
+    end
+    emb = scale(scaler_emb, hcat(BERT.(smiles; is_canonical=true)...))
 
-    params = HANNAParam(params["canonicalsmiles"], emb_scaled, T_scaler, theta, alpha, phi, params["Mw"])
+    
+
+    params = HANNAParam(scale(scaler_emb, emb), scaler_T, nn, ps, st, _params["Mw"])
     
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
     references = String["10.1039/D4SC05115G"]
     model = HANNA(components, params, _puremodel, references)
     CL.set_reference_state!(model,reference_state,verbose = verbose)
 
-    #println("SMILES im Modell: ", model.params.smiles.values)
     return model
 end
 

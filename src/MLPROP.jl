@@ -1,6 +1,7 @@
 module MLPROP
 
-using Clapeyron, Lux, ConcreteStructs, ChemBERTa, LinearAlgebra, DelimitedFiles, Random, CSV
+using JLD2, ConcreteStructs, LinearAlgebra, Random
+using Clapeyron, Lux, ChemBERTa
 
 const CL = Clapeyron
 
@@ -13,7 +14,7 @@ const DB_PATH = normpath(Base.pkgdir(MLPROP),"database")
 BERT = nothing
 
 # Models
-include("HANNA_legacy.jl")
+include("models/models.jl")
 
 
 end

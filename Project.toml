@@ -4,11 +4,10 @@ version = "1.0.0-DEV"
 authors = ["se-schmitt <se.s.schmitt@gmail.com> and contributors"]
 
 [deps]
-CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 ChemBERTa = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
 Clapeyron = "7c7805af-46cc-48c9-995b-ed0ed2dc909a"
 ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -21,10 +20,10 @@ RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 ChemBERTa = {path = "lib/ChemBERTa"}
 
 [compat]
-CSV = "0.10.15"
 Clapeyron = "0.6.14"
 ConcreteStructs = "0.2.3"
 DelimitedFiles = "1.9.1"
+JLD2 = "0.6.3"
 LinearAlgebra = "1.12.0"
 Lux = "1.16.0"
 Random = "1.11.0"
