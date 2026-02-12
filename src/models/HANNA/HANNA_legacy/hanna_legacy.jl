@@ -9,10 +9,6 @@ struct HANNAParam{T,P,S} <: CL.EoSParam
     Mw::SingleParam{T}
 end
 
-# Constants for Lux model
-const N_EMB = 384
-const N_NODES = 96
-
 function CL.split_model(param::HANNAParam, splitter)
     return [CL.each_split_model(param, i) for i ∈ splitter]
 end
@@ -96,6 +92,8 @@ function HANNA(components;
     for i in eachindex(_components)]
 
     # Create model
+    N_EMB = 384
+    N_NODES = 96
     nn = LuxHANNA(
         Dense(N_EMB, N_NODES, silu),
         Chain(Dense(N_NODES + 2, N_NODES, silu), Dense(N_NODES, N_NODES, silu)),
