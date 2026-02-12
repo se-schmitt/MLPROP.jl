@@ -18,8 +18,8 @@ function (model::LuxHANNA)((T,x,embs), ps, st)
     α1_in = vcat(T, x[1], θ1) 
     α2_in = vcat(T, x[2], θ2)
 
-    α1_out = first(model(α1_in, ps.alpha, st.alpha))
-    α2_out = first(model(α2_in, ps.alpha, st.alpha))
+    α1_out = first(model.alpha(α1_in, ps.alpha, st.alpha))
+    α2_out = first(model.alpha(α2_in, ps.alpha, st.alpha))
     
     c_mix = α1_out .+ α2_out
     

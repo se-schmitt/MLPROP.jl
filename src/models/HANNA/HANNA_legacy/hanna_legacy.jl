@@ -3,7 +3,7 @@ abstract type HANNAModel <: CL.ActivityModel end
 struct HANNAParam{T,P,S} <: CL.EoSParam
     emb::Matrix{T}
     scaler_T::AbstractScaler{T}
-    model::LuxHANNA
+    nn::LuxHANNA
     ps::P
     st::S
     Mw::SingleParam{T}
@@ -86,7 +86,7 @@ function HANNA(components;
     _components = CL.format_components(components)
     
     _params = CL.getparams(components,CL.default_locations(HANNA);
-        userlocations,ignore_headers=["dipprnumber","inchikey","cas"], ignore_missing_singleparams=["canonicalsmiles"])
+        userlocations,ignore_headers=["dipprnumber","inchikey","cas"], ignore_missing_singleparams=["canonicalsmiles", "Mw"])
 
     length(_components) > 2 && error("`HANNA` is not suited for multicomponent systems. Use `HANNA` instead.")
     smiles = [
@@ -113,8 +113,6 @@ function HANNA(components;
     end
     emb = scale(scaler_emb, hcat(BERT.(smiles; is_canonical=true)...))
 
-    
-
     params = HANNAParam(scale(scaler_emb, emb), scaler_T, nn, ps, st, _params["Mw"])
     
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
@@ -125,38 +123,13 @@ function HANNA(components;
     return model
 end
 
-
 function CL.excess_gibbs_free_energy(model::HANNA, p, T, z)
     x = z ./ sum(z)
-    #Alias
+    
     params = model.params
-    # Scale input (T and embs)
-    T_s = params.T_scaler(T)
-    # Fine tuning of the component embeddings
-    θ_i = [first(params.theta.model(emb, params.theta.ps, params.theta.st)) for emb in params.emb_scaled]
-    gE = zero(Base.promote_eltype(T_s,x))
-    n = length(model)
-    for i in 1:n 
-        for j in (i+1):n
-            # Calculate cosine similarity and distance between the two components
-            cosine_sim_ij = cosine_similarity(θ_i[i],θ_i[j])
-            cosine_dist_ij = 1.0 - cosine_sim_ij
-
-            # Concatenate embeddings with T and x
-            input_i = vcat(T_s, x[i], θ_i[i]) 
-            input_j = vcat(T_s, x[j], θ_i[j])
-
-            out_a_i = first(params.alpha.model(input_i, params.alpha.ps, params.alpha.st))
-            out_a_j = first(params.alpha.model(input_j, params.alpha.ps, params.alpha.st))
-            
-            c_mix = out_a_i .+ out_a_j
-            
-            gE_NN = first(params.phi.model(c_mix, params.phi.ps, params.phi.st))[1]
-
-            # Apply cosine similarity adjustment
-            gE += x[i]*x[j]*gE_NN*cosine_dist_ij
-        end
-    end
+    Ts = scale(params.scaler_T, T)
+    gE = params.nn((Ts,x,params.emb), params.ps, params.st)
+    
     return gE * Rgas(model) * T * sum(z)
 end
 

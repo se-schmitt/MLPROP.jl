@@ -36,11 +36,16 @@ using MLPROP, ChemBERTa, Clapeyron
 
     # Calculating the gammas for a given SMILES-pair and compare to Python reference
     for (system_i, (γs_ref_i, smiles_i)) in systems
+        # Use Clapeyron.jl database
         model = HANNA(system_i)
         γs_i = activity_coefficient(model, 1e5, 300., [.5,.5])
         @test γs_i[1] ≈ γs_ref_i[1] rtol=1e-5
         @test γs_i[2] ≈ γs_ref_i[2] rtol=1e-5
 
+        # Use `userlocations` keyword
         model_smiles = HANNA(["comp A", "comp B"]; userlocations=(;SMILES=smiles_i))
+        γs_i_smiles = activity_coefficient(model_smiles, 1e5, 300., [.5,.5])
+        @test γs_i_smiles[1] ≈ γs_ref_i[1] rtol=1e-5
+        @test γs_i_smiles[2] ≈ γs_ref_i[2] rtol=1e-5
     end
 end
