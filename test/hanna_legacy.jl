@@ -26,27 +26,19 @@ using MLPROP, ChemBERTa, Clapeyron
 
 
 @testset "HANNA_legacy" begin
-    # SMILES to test
-    components_list = [
-        ["water", "ethanol"],                                
-        ["DMSO","water"],                          
-        ["aspirin","methanol"],              
-        ["saccharin","methanol"],      
-    ]
-
-    gammas_ref = [
-        [1.455121, 1.248844],   # water + ethanol
-        [0.756031, 0.552130],   # dmso + water
-        [1.197029, 1.551961],   # aspirin + methanol
-        [1.185503, 1.335264]    # saccharin + methanol
-    ]
+    # System to test
+    systems = Dict(
+        ["water", "ethanol"]     => [1.455121, 1.248844],                                
+        ["DMSO","water"]         => [0.756031, 0.552130],                          
+        ["aspirin","methanol"]   => [1.197029, 1.551961],              
+        ["saccharin","methanol"] => [1.185503, 1.335264],      
+    )
 
     # Calculating the gammas for a given SMILES-pair and compare to Python reference
-    results = Vector{Vector{Float64}}()
-    for system in components_list
+    for (system, γs_ref) in systems
         model = MLPROP.HANNA(system)
-        gammas = activity_coefficient(model, 1e5, 300., [.5,.5])
-        push!(results, gammas)
+        γs = activity_coefficient(model, 1e5, 300., [.5,.5])
+        @test γs[1] ≈ γs_ref[1] rtol=1e-5
+        @test γs[2] ≈ γs_ref[2] rtol=1e-5
     end
-    @test results ≈ gammas_ref atol=1e-5
 end
