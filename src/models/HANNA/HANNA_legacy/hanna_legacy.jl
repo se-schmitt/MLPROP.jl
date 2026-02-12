@@ -111,7 +111,7 @@ function HANNA(components;
     if isnothing(BERT)
         global BERT = ChemBERTa.load()
     end
-    emb = scale(scaler_emb, hcat(BERT.(smiles; is_canonical=true)...))
+    emb = hcat(BERT.(smiles; is_canonical=true)...)
 
     params = HANNAParam(scale(scaler_emb, emb), scaler_T, nn, ps, st, _params["Mw"])
     
