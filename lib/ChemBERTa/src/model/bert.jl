@@ -127,9 +127,9 @@ struct ChemBERTaModel
     smodel::StatefulLuxLayer
     tokenizer::ChemBERTaTokenizer
 end
-function (model::ChemBERTaModel)(smiles::AbstractString)
+function (model::ChemBERTaModel)(smiles::AbstractString; is_canonical=false)
     # Canonicalize smiles
-    _smiles = canonicalize(smiles)
+    _smiles = is_canonical ? smiles : canonicalize(smiles)
 
     # tokenizer
     enc = encode(model.tokenizer.encoder, _smiles)

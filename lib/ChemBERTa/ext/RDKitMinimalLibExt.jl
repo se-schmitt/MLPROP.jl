@@ -4,20 +4,11 @@ using ChemBERTa
 using RDKitMinimalLib: RDKitMinimalLib as RDK
 
 function __init__()
-    if isdefined(Main, :ChemBERTa) && Base.get_extension(Main.ChemBERTa, :PythonCallExt) isa Module
-        @warn """
-        Function `ChemBERTa.canonicalize` defined by `RDKitMinimalLibExt` and `PythonCallExt`!
-        `RDKitMinimalLibExt` is used.
-        """
-    end
+    ChemBERTa._canonicalize[] = _canonicalize_rdk
 end
 
-function _canonicalize(smiles)
+function _canonicalize_rdk(smiles)
     return RDK.get_smiles(RDK.get_mol(smiles))
-end
-
-function ChemBERTa.canonicalize(smiles::AbstractString; kwargs...)
-    return _canonicalize(smiles)
 end
 
 end
