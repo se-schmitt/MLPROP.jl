@@ -1,6 +1,8 @@
-using MLPROP, Clapeyron, PythonCall
+using MLPROP, Clapeyron, PythonCall, ChemBERTa
 
 @testset "Models" begin
+    include("test_hanna.jl")
+
     @testset "GRAPPA" begin
         # Compare to https://ml-prop.mv.rptu.de
         model1 = GRAPPA("ethanol")

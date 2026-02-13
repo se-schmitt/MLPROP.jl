@@ -1,6 +1,6 @@
 import os
 import torch
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel
 from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.pre_tokenizers import Split
@@ -9,27 +9,25 @@ from rdkit import Chem
 
 def initialize_ChemBERTA(model_name="DeepChem/ChemBERTa-77M-MTR", device=None):
 
-    model_path = '../../lib/ChemBERTa/data'
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.abspath(os.path.join(current_file_dir, '../../../lib/ChemBERTa/data'))
 
     ChemBERTA = AutoModel.from_pretrained(
         model_path,
         local_files_only=True
     ).to(device)
 
-    # Check if the vocabulary file already exists
     vocab_path = os.path.join(model_path, 'vocab.json')
     if not os.path.exists(vocab_path):
-        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+        raise FileNotFoundError(f"Missing tokenizer vocabulary: {vocab_path}")
         
-    # Load custom tokenizer using the saved vocab.json
     custom_tokenizer = Tokenizer(
         WordLevel.from_file(
-            vocab_path,  # Path to your custom vocabulary file
+            vocab_path,
             unk_token='[UNK]'
         )
     )
 
-    # Set the pre-tokenizer to split SMILES characters (including handling Br, Cl, etc.)
     pre_tokenizer = Split(
         pattern=Regex(r"\[(.*?)\]|Br|Cl|."),
         behavior='isolated'
