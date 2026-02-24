@@ -42,12 +42,12 @@
         # Use Clapeyron.jl database
         model = multHANNA(system_i)
         γs_i = activity_coefficient(model, 1e5, 300., [.5, .3, .2])
-        @test γs_i[1] ≈ exp(γs_ref_i[1]) rtol=1e-5
-        @test γs_i[2] ≈ exp(γs_ref_i[2]) rtol=1e-5
-        @test γs_i[3] ≈ exp(γs_ref_i[3]) rtol=1e-5
+        @test γs_i[1] ≈ exp(lnγs_ref_i[1]) rtol=1e-5
+        @test γs_i[2] ≈ exp(lnγs_ref_i[2]) rtol=1e-5
+        @test γs_i[3] ≈ exp(lnγs_ref_i[3]) rtol=1e-5
 
         # Use `userlocations` keyword
-        model_smiles = ogHANNA(["comp A", "comp B", "comp C"]; userlocations=(;SMILES=smiles_i))
+        model_smiles = multHANNA(["comp A", "comp B", "comp C"]; userlocations=(;SMILES=smiles_i))
         γs_i_smiles = activity_coefficient(model_smiles, 1e5, 300., [.5, .3, .2])
         @test γs_i_smiles[1] ≈ exp(lnγs_ref_i[1]) rtol=1e-5
         @test γs_i_smiles[2] ≈ exp(lnγs_ref_i[2]) rtol=1e-5

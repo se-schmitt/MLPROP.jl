@@ -18,9 +18,8 @@ all_st = []
 # Loop over all weight files and summarize in one file
 for i in 0:9
     println("Reading parameter file $i...")
-
     pt_file = joinpath(python_model_dir, "HANNA_parameters_binary$i.pt")
-    
+
     state_dict = torch.load(pt_file, map_location=torch.device("cpu"))
     
     # Help function to convert weights, bias and ci from PyTorch to Julia
@@ -62,7 +61,7 @@ for i in 0:9
     phi3_v  = get_vec("phi.2._v")
 
     # build parameter and state namedtuples
-    ps_i = (
+	ps_i = (
         theta = (layer_1 = (weight = theta_w, bias = theta_b, ci = theta_ci), 
                 layer_2 = NamedTuple()),
         

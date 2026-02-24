@@ -17,7 +17,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 
 [sources]
-ChemBERTa = {path = "lib/ChemBERTa"}
+ChemBERTa = {path = "lib\\ChemBERTa"}
 
 [extensions]
 PythonCallExt = "PythonCall"
