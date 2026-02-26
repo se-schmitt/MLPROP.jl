@@ -32,9 +32,9 @@
 @testset "multHANNA" begin
     # Systems to test, multHANNAs γ is raw, reference γ is ln(γ)
     systems = Dict(
-        ["water", "ethanol", "methanol"]        => ([0.28, 0.28, -0.03], ["O", "CCO", "CO"]),
-        ["dmso", "ethanol", "aspirin"]          => ([0.11, 0.03, 0.59], ["OCS(=O)C", "CCO", "CC(=O)Oc1ccccc1C(=O)O"]),
-        ["saccharin", "methanol", "chloroform"] => ([0.03, 0.41, 0.33], ["C1=CC=C2C(=C1)C(=O)NS2(=O)=O", "CO", "ClC(Cl)Cl"])
+        ["water", "ethanol", "methanol"]        => ([0.277717203, 0.278312653, -0.033341952], ["O", "CCO", "CO"]),
+        ["dmso", "ethanol", "aspirin"]          => ([-0.047125854, -0.071092166, 0.233126670], ["CS(=O)C", "CCO", "CC(=O)Oc1ccccc1C(=O)O"]),
+        ["saccharin", "methanol", "chloroform"] => ([0.028507818, 0.408137769, 0.330980510], ["C1=CC=C2C(=C1)C(=O)NS2(=O)=O", "CO", "ClC(Cl)Cl"])
     )
 
     # Calculating the gammas for a given SMILES-pair and compare to Python reference

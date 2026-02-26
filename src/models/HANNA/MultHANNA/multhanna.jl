@@ -75,9 +75,9 @@ function multHANNA(components;
     )
     
     # load parameters and scalers
-    ps, st = load(joinpath(get_model_path(multHANNA),"parameters_states_all_multhanna.jld2"), "ps", "st")
-    scaler_T =   load_scaler(joinpath(get_model_path(multHANNA), "scaler_T_multhanna.jld2"))
-    scaler_emb = load_scaler(joinpath(get_model_path(multHANNA), "scaler_emb_multhanna.jld2"))
+    ps, st = load(joinpath(get_model_path(multHANNA),"parameters_states_all.jld2"), "ps", "st")
+    scaler_T =   load_scaler(joinpath(get_model_path(multHANNA), "scaler_T.jld2"))
+    scaler_emb = load_scaler(joinpath(get_model_path(multHANNA), "scaler_emb.jld2"))
 
     # Calc embeddings
     if isnothing(BERT)
