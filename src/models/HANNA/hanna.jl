@@ -2,8 +2,8 @@ include("ogHANNA/layers.jl")
 include("ogHANNA/oghanna.jl")
 
 #multHANNA
-include("MultHANNA/layers_multhanna.jl")
-include("MultHANNA/multhanna.jl")
+include("multHANNA/layers_multhanna.jl")
+include("multHANNA/multhanna.jl")
 
 # Utils 
 silu(x) = @. x/(1+exp(-x))
