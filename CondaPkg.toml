@@ -1,5 +1,4 @@
 [deps]
-scikit-learn = ""
 python = "<=3.13,>=3.9,<4"
 
 [pip.deps]

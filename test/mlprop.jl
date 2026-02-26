@@ -1,4 +1,4 @@
-using MLPROP, Clapeyron, PythonCall, ChemBERTa  
+using MLPROP, Clapeyron, PythonCall, ChemBERTa
 
 @testset "Models" begin
     include("test_hanna.jl")

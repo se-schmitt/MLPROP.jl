@@ -13,11 +13,11 @@ Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [weakdeps]
-RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
 
 [sources]
-ChemBERTa = {path = "lib\\ChemBERTa"}
+ChemBERTa = {path = "lib/ChemBERTa"}
 
 [extensions]
 PythonCallExt = "PythonCall"
