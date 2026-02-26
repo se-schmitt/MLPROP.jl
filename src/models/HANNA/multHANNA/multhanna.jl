@@ -65,13 +65,13 @@ function multHANNA(components;
     
     nn = multHANNALux(
         # theta
-        Chain(LipschitzLinear(N_EMB, N_NODES), silu),
+        Chain(LipschitzDense(N_EMB, N_NODES), silu),
         # alpha
-        Chain(LipschitzLinear(N_NODES + 2, N_NODES), silu, 
-            LipschitzLinear(N_NODES, N_NODES), silu),
+        Chain(LipschitzDense(N_NODES + 2, N_NODES), silu, 
+            LipschitzDense(N_NODES, N_NODES), silu),
         # phi
-        Chain(LipschitzLinear(N_NODES, N_NODES), silu, 
-            LipschitzLinear(N_NODES, 1))
+        Chain(LipschitzDense(N_NODES, N_NODES), silu, 
+            LipschitzDense(N_NODES, 1))
     )
     
     # load parameters and scalers
