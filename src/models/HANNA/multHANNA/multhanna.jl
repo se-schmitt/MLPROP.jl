@@ -22,7 +22,6 @@ function CL.each_split_model(param::multHANNAParam, i)
     return multHANNAParam(emb_subset, param.scaler_T, param.nn, param.ps, param.st, Mw, param.gamma)
 end
 
-
 struct multHANNA{c<:CL.EoSModel,T,P,S} <: multHANNAModel
     components::Array{String,1}
     params::multHANNAParam{T,P,S}
@@ -30,10 +29,13 @@ struct multHANNA{c<:CL.EoSModel,T,P,S} <: multHANNAModel
     references::Array{String,1}
 end
 
-"""
-    multHANNA <: ActivityModel
+const HANNA = multHANNA
 
-    multHANNA(components;
+"""
+    HANNA <: ActivityModel
+    multHANNA
+
+    HANNA(components;
     puremodel = nothing,
     userlocations = String[],
     pure_userlocations = String[],
@@ -45,29 +47,28 @@ end
 - `Mw`: Single Parameter (`Float64`) (Optional) - Molecular Weight `[g·mol⁻¹]`
 
 ## Input models
-- `puremodel`: model to calculate pure pressure-dependent properties
+- `puremodel`: model to calculate pure component properties
 
 ## Description
-Hard-Constraint Neural Network for Consistent Activity Coefficient Prediction (HANNA v1.0.0).
-The implementation is based on [this](https://github.com/tspecht93/HANNA) Github repository.
-`multHANNA` was trained on all available binary VLE data (up to 10 bar) and limiting activity coefficients from the Dortmund Data Bank. `multHANNA` was only developed for binary mixtures. Use `HANNA` for multicomponent mixtures.
+Hard-Constraint Neural Network for Consistent Activity Coefficient Prediction (HANNA).
+`HANNA` was trained on all available binary VLE data (up to 10 bar) and limiting activity coefficients from the Dortmund Data Bank.
 
 ## Example
 ```julia
 using MLPROP, Clapeyron
 
-components = ["water","isobutanol"]
-Mw = [18.01528, 74.1216]
-smiles = ["O", "CC(C)CO"]
+components = ["dmso", "ethanol", "aspirin"]
+Mw = [78.13, 46.068, 180.158]
+smiles = ["CS(=O)C", "CCO", "CC(=O)Oc1ccccc1C(=O)O"]
 
-model = multHANNA(components,userlocations=(;Mw=Mw, SMILWS=smiles))
-# model = multHANNA(components) # also works if components are in the database 
+model = HANNA(components,userlocations=(;Mw=Mw, SMILES=smiles))
+# model = HANNA(components) # also works if components are in the database 
 ```
 
 ## References
-1. .
+1.  M. Hoffmann, T. Specht, Q. Göttl, J. Burger, S. Mandt, H. Hasse, and F. Jirasek: A Machine-Learned Expression for the Excess Gibbs Energy, (2025), DOI: https://doi.org/10.48550/arXiv.2509.06484.
 """
-multHANNA   #TODO revise docstring
+multHANNA
 
 CL.default_locations(::Type{multHANNA}) = ["properties/identifiers.csv", "properties/molarmass.csv"]
 get_model_path(::Type{multHANNA}) = joinpath(DB_PATH, "multHANNA")
