@@ -158,4 +158,4 @@ function CL.excess_gibbs_free_energy(model::multHANNAModel, p, T, z)
     return gE_mean_dim_less * Rgas(model) * T * sum(z)
 end
 
-export multHANNA
+export HANNA, multHANNA
