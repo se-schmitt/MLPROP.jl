@@ -1,23 +1,50 @@
+abstract type ESEModel <: ES.AbstractTransportPropertyModel end
 
-struct ESEParam{T}
-    M::T
-    b_ij::T
+struct ESEParam{T,P,S}
+    b_ij::Matrix{T}
+    nn::multHANNALux      
+    ps::P                 
+    st::S                 
+    Mw::SingleParam{T}
 end
 
-struct ESE{M,T}
-    components::Vector{AbstractString}
-    param::ESEParam{T}
-    vis_model::M
+struct ESE{M,T,P,S} <: ESEModel
+    components::Array{String,1}
+    params::ESEParam{T,P,S}
+    vismodel::M
+    references::Array{String,1}
 end
 
 """
-    ESE(SMILE_i, SMILE_j, vis_model)
+    ESE <: AbstractTransportPropertyModel
+
+    ESE(components;
+    vismodel = nothing,
+    userlocations = String[],
+    pure_userlocations = String[],
+    verbose = false)
+
+## Input parameters
+- `SMILES`: canonical SMILES (using RDKit) representation of the components
+- `Mw`: single parameter (`Float64`) (Optional) - Molecular Weight `[g·mol⁻¹]`
+- `vismodel`: viscosity model 
 
 ## Description
 
-ESE model for calculating diffusion coefficients at infinite dilution in a binary mixture.
-The model predicts the boosting factor for the Stokes-Einstein equation using a neural network
-trained on molecular descriptors of the solute and solvent.
+ESE model for calculating diffusion coefficients at infinite dilution.
+The diffusion coefficient at infinite dilution can be calculated by calling [`inf_diffusion_coefficient`](https://se-schmitt.github.io/EntropyScaling.jl/stable/).
+
+If no viscosity model is specified, a `GCESModel` from `EntropyScaling.jl` is constructed (if possible).
+A constant viscosity model can also be used if the viscosity η is knwon as `ESE(...; vismodel=ConstantModel(Viscosity(), η))`.
+
+## Examples
+```julia
+using MLPROP, EntropyScaling
+
+model = ESE(["ethanol", "acetonitrile"])
+D_matrix = inf_diffusion_coefficient(model, 1e5, 300.)
+D_eth = inf_diffusion_coefficient(model, 1e5, 300.; solute="ethanol", solvent="acetonitril")
+```
 """
 function ESE(SMILE_i::AbstractString, SMILE_j::AbstractString, eta_fun)
     #TODO use Clapeyron style
@@ -82,18 +109,19 @@ end
 
 Base.broadcastable(x::ESE) = Ref(x)
 
-function ES.inf_diffusion_coefficient(model::ESE, p, T, z=ES.Z1; phase=:unknown, solute=nothing, solvent=nothing)
-    # Initialitzing constants required for Stokes-Einstein-equation
-    k_b = 1.380649e-23
-    roh_i= 1050
-    f=0.64
-    M_i=model.param.M
-    visc_j=model.vis_model(T)
-    N_A=6.02214076e23
-    r_i=((3*f*M_i)/(4*pi*roh_i*N_A))^(1/3)
-    D_SEE_ij_infdil = (k_b*T)/(6*pi*visc_j*r_i)
-    return D_SEE_ij_infdil * model.param.b_ij
+function ES._inf_diffusion_coefficient(model::ESE, p, T, (idx_i,idx_j); phase=:unknown)
+    TT = Base.promote_eltype(p,T)
 
+    # Initialitzing constants required for Stokes-Einstein-equation
+    f = 0.64
+    ϱ_ref = 1050.
+    M_i = model.params.Mw
+    x_j = setindex!(zeros(TT,length(model)), one(TT), idx_j)
+    η_j = viscosity(model.vismodel, p, T, x_j)
+
+    r_i = cbrt(f * 3 * M_i / (4π * ϱ_ref * NA))
+    Dᵢⱼ_SE = (kB*T)/(6π*η_j*r_i)
+    return Dᵢⱼ_SE * model.param.b_ij[idx_i,idx_j]
 end
 
 
