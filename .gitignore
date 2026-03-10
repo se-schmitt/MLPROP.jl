@@ -6,3 +6,4 @@ __pycache__
 .CondaPkg
 *.egg-info
 build
+debug_*
