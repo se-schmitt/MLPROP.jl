@@ -5,8 +5,8 @@ include("grappa.jl")
 include("HANNA/hanna.jl")
 
 # Show method
-const MLPROP_MODELS = Union{GRAPPA, ogHANNA, multHANNA}
-function Base.show(io::IO, mime::MIME"text/plain", model::MLPROP_MODELS)
+const MLPROP_MODELS = Union{GRAPPA, ogHANNA, multHANNA, ESE}
+function Base.show(io::IO, ::MIME"text/plain", model::MLPROP_MODELS)
     print(io, nameof(typeof(model)))
     length(model) == 1 && println(io, " with 1 component:")
     length(model) > 1 && println(io, " with ", length(model), " components:")
@@ -17,6 +17,7 @@ function Base.show(io::IO, mime::MIME"text/plain", model::MLPROP_MODELS)
     CL.show_reference_state(io,model)
     CL.may_show_references(io,model)
 end
+CL.show_reference_state(io,::ESE) = nothing
 
 # placeholder function for RDKit #TODO move to utils??
 function _get_descriptors_error(smiles)

@@ -1,18 +1,19 @@
 abstract type ESEModel <: ES.AbstractTransportPropertyModel end
 
-struct ESEParam{T,P,S}
-    b_ij::Matrix{T}
-    nn::multHANNALux      
-    ps::P                 
-    st::S                 
+struct ESEParam{T}
+    b_ij::Matrix{T}            
     Mw::SingleParam{T}
 end
 
-struct ESE{M,T,P,S} <: ESEModel
+struct ESE{T,M} <: ESEModel
     components::Array{String,1}
-    params::ESEParam{T,P,S}
+    params::ESEParam{T}
     vismodel::M
     references::Array{String,1}
+end
+
+@kwdef @concrete struct ESELux <: AbstractLuxWrapperLayer{:layer}
+    layer = Chain(Dense(12 => 32, relu), Dense(32 => 16, relu), Dense(16 => 1, softplus))
 end
 
 """
@@ -21,7 +22,7 @@ end
     ESE(components;
     vismodel = nothing,
     userlocations = String[],
-    pure_userlocations = String[],
+    vis_userlocations = String[],
     verbose = false)
 
 ## Input parameters
@@ -46,83 +47,84 @@ D_matrix = inf_diffusion_coefficient(model, 1e5, 300.)
 D_eth = inf_diffusion_coefficient(model, 1e5, 300.; solute="ethanol", solvent="acetonitril")
 ```
 """
-function ESE(SMILE_i::AbstractString, SMILE_j::AbstractString, eta_fun)
-    #TODO use Clapeyron style
-    # Loading weights and bias from nn_parameters.jld2
-    path_nn_parameters = joinpath(DB_PATH, "ESE", "weights_bias_true.jld2")
-    nn_parameters = load(path_nn_parameters)["Weights_Bias_ESE"]
+ESE 
+
+CL.default_locations(::Type{ESE}) = ["properties/identifiers.csv", "properties/molarmass.csv"]
+get_model_path(::Type{ESE}) = joinpath(DB_PATH, "ESE")
+
+function ESE(components;
+        vismodel = RefpropRESModel,             # TODO switch to GC model,
+        userlocations = String[],
+        vis_userlocations = String[],
+        verbose = false,
+)
+
+    # loading SMILES und Parameter
+    _components = CL.format_components(components)
+    N_comps = length(_components)
     
-    # Processing SMILES to get molecular descriptors used in neural net
-    desc_i, desc_j = get_descriptors(SMILE_i), get_descriptors(SMILE_j)
+    _params = CL.getparams(components,CL.default_locations(ESE);
+        userlocations,ignore_headers=["dipprnumber","inchikey","cas","canonicalsmiles","Mw"])
 
-    mw_i = desc_i["exactmw"] * 1e-3
-    mw_j = desc_j["exactmw"] * 1e-3
+    smiles = _params["SMILES"].values
+    descs = get_descriptors.(smiles)
 
-    is_water_i = SMILE_i == "O" || SMILE_i == "[2H]O[2H]"
-    is_water_j = SMILE_j == "O" || SMILE_j == "[2H]O[2H]"
+    nn = ESELux()
+    ps, st = load(joinpath(get_model_path(ESE),"parameters_states_ensemble.jld2"), "ps", "st")
+    st = Lux.testmode.(st)
+    N_ensemble = length(ps)
 
-    X_i_ini = [
-        mw_i;
-        is_water_i ? 0.5 : desc_i["NumHBA"] / desc_i["NumHeavyAtoms"];
-        is_water_i ? 0.5 : desc_i["NumHBD"] / desc_i["NumHeavyAtoms"];
-        desc_i["NumHeteroatoms"] / desc_i["NumHeavyAtoms"];
-        desc_i["NumHalogens"] / desc_i["NumHeavyAtoms"];
-        desc_i["NumRings"] != 0;
-    ]
-    X_j_ini = [
-        mw_j;
-        is_water_j ? 0.5 : desc_j["NumHBA"] / desc_j["NumHeavyAtoms"];
-        is_water_j ? 0.5 : desc_j["NumHBD"] / desc_j["NumHeavyAtoms"];
-        desc_j["NumHeteroatoms"] / desc_j["NumHeavyAtoms"];
-        desc_j["NumHalogens"] / desc_j["NumHeavyAtoms"];
-        desc_j["NumRings"] != 0;
-    ]
+    Xs = get_ese_X.(smiles)
+    _X2 = zeros(12,1)
+    b_ij = zeros(N_comps, N_comps)
 
-    input = vcat(X_i_ini, X_j_ini)
-    MW = mw_i
-    b_ij_mean = 0.0
-
-    #Initializing Neural Net using Lux
-    NN = Chain(Dense(12 => 32, relu), Dense(32 => 16, relu), Dense(16 => 1, softplus))
-
-    # Looping over parameter-sets to determine mean b_ij
-    for (_, wb) in nn_parameters
-
-        #Setting up the weights and bias of the neural net using Lux-Synatx
-        st = (layer_1 = NamedTuple(), layer_2 = NamedTuple(), layer_3 = NamedTuple())
-        ps = (
-            (layer_1 = (weight = wb[2], bias = vec(wb[1]))),
-            (layer_2 = (weight = wb[4], bias = vec(wb[3]))),
-            (layer_3 = (weight = wb[6], bias = vec(wb[5]))),
-        )
-        #applying neural net with given weights and bias to calculate b_ij
-        b_ij, st = NN(input, ps, st)
-        b_ij_mean += only(b_ij)
+    for i in 1:N_comps, j in 1:N_comps
+        if i != j
+            _X2[1:6] .= Xs[i]
+            _X2[7:12] .= Xs[j]
+            for (psᵢ, stᵢ) in zip(ps, st)
+                b_ij[i,j] += only(first(nn(_X2, psᵢ, stᵢ))) ./ N_ensemble
+            end
+        end
     end
-    b_ij_mean /= length(nn_parameters)
 
-    # Constructing ESEParam-datastructure
-    paramESE = ESEParam(MW, b_ij_mean)
+    params = ESEParam(b_ij, SingleParam("Mw",_components,first.(Xs)*1e3))
+    _vismodel = PureModelContainer(Viscosity(), vismodel, _components; userlocations=vis_userlocations, verbose)
+    references = String["10.48550/arXiv.2603.02761"]
 
-    return ESE([String(SMILE_i), String(SMILE_j)], paramESE, eta_fun)
+    return ESE(_components, params, _vismodel, references)
+end
+
+function get_ese_X(smiles)
+    desc = get_descriptors(smiles)
+    is_water = smiles in ["O", "[2H]O[2H]"]
+
+    X = [
+        desc["exactmw"] * 1e-3,
+        is_water ? 0.5 : desc["NumHBA"] / desc["NumHeavyAtoms"],
+        is_water ? 0.5 : desc["NumHBD"] / desc["NumHeavyAtoms"],
+        desc["NumHeteroatoms"] / desc["NumHeavyAtoms"],
+        desc["NumHalogens"] / desc["NumHeavyAtoms"],
+        desc["NumRings"] != 0,
+    ]
+
+    return X
 end
 
 Base.broadcastable(x::ESE) = Ref(x)
 
-function ES._inf_diffusion_coefficient(model::ESE, p, T, (idx_i,idx_j); phase=:unknown)
+function ES._inf_diffusion_coefficient(model::ESE, p, T, (idx_i,idx_j); phase=:liquid)
     TT = Base.promote_eltype(p,T)
 
     # Initialitzing constants required for Stokes-Einstein-equation
     f = 0.64
     ϱ_ref = 1050.
-    M_i = model.params.Mw
-    x_j = setindex!(zeros(TT,length(model)), one(TT), idx_j)
-    η_j = viscosity(model.vismodel, p, T, x_j)
+    M_i = model.params.Mw.values[idx_i]*1e-3
+    η_j = viscosity(model.vismodel, p, T, idx_j; phase)
 
     r_i = cbrt(f * 3 * M_i / (4π * ϱ_ref * NA))
-    Dᵢⱼ_SE = (kB*T)/(6π*η_j*r_i)
-    return Dᵢⱼ_SE * model.param.b_ij[idx_i,idx_j]
+    Dij_SE = (kB*T)/(6π*η_j*r_i)
+    return Dij_SE * model.params.b_ij[idx_i,idx_j]
 end
-
 
 export ESE
