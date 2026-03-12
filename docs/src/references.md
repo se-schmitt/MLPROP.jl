@@ -1,1 +1,4 @@
 # References
+
+```@bibliography
+```

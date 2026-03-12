@@ -1,6 +1,9 @@
 using Documenter
 using DocumenterVitepress
+using DocumenterCitations
 using MLPROP, Clapeyron
+
+bib = CitationBibliography(joinpath(@__DIR__, "src", "refs.bib"); style=:numeric)
 
 makedocs(;
     sitename = "MLPROP.jl",
@@ -14,7 +17,7 @@ makedocs(;
         "Models" => "models.md",
         "References" => "references.md"
     ],
-    # plugins=[bib]
+    plugins=[bib]
 )
 
 # DocumenterVitepress.deploydocs(;
