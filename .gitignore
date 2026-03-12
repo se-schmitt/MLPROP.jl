@@ -7,3 +7,5 @@ __pycache__
 *.egg-info
 build
 debug_*
+docs/build/
+docs/node_modules/
