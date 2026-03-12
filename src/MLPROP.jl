@@ -1,9 +1,10 @@
 module MLPROP
 
 using JLD2, ConcreteStructs, LinearAlgebra, Random
-using Clapeyron, Lux, ChemBERTa
+using Clapeyron, Lux, ChemBERTa, JLD2, EntropyScaling
 
 const CL = Clapeyron
+const ES = EntropyScaling
 
 const kB = 1.380649e-23
 const NA = 6.02214076e23
@@ -18,6 +19,5 @@ include("layers/layers.jl")
 
 # Models
 include("models/models.jl")
-
 
 end
