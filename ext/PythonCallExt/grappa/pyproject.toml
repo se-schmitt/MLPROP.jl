@@ -1,7 +1,7 @@
 [project]
 name = "grappa"
 version = "0.1.0"
-description = "GRAPPA model to be used in MLPROP.jl"
+description = "GRAPPA model to be used in MLThermoProperties.jl"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

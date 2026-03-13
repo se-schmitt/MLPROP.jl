@@ -55,7 +55,7 @@ Hard-Constraint Neural Network for Consistent Activity Coefficient Prediction (H
 
 ## Example
 ```julia
-using MLPROP, Clapeyron
+using MLThermoProperties, Clapeyron
 
 components = ["dmso", "ethanol", "aspirin"]
 Mw = [78.13, 46.068, 180.158]

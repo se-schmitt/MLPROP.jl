@@ -40,7 +40,7 @@ A constant viscosity model can also be used if the viscosity η is knwon as `ESE
 
 ## Examples
 ```julia
-using MLPROP, EntropyScaling
+using MLThermoProperties, EntropyScaling
 
 model = ESE(["ethanol", "acetonitrile"])
 D_matrix = inf_diffusion_coefficient(model, 1e5, 300.)

@@ -1,4 +1,4 @@
-using MLPROP, Clapeyron, PythonCall, ChemBERTa, JLD2, EntropyScaling
+using MLThermoProperties, Clapeyron, PythonCall, ChemBERTa, JLD2, EntropyScaling
 
 @testset "Models" begin
     include("test_ese.jl")

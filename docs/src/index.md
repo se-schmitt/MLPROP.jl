@@ -4,11 +4,11 @@
 layout: home
 
 hero:
-  name: MLPROP
+  name: MLThermoProperties.jl
   text: State-of-the-art hybrid thermodynamic models
   image:
     src: /logo.png
-    alt: MLPROP.jl
+    alt: MLThermoProperties.jl
   tagline: Hybrid machine learning models to predict various thermodynamic properties - from phase equilibria to transport properties 
   actions:
     - theme: alt
@@ -19,7 +19,7 @@ hero:
       link: /tutorials
     - theme: alt
       text: View on GitHub
-      link: https://github.com/se-schmitt/MLPROP.jl
+      link: https://github.com/se-schmitt/MLThermoProperties.jl
 
 features:
   - icon: 🤝
@@ -41,15 +41,15 @@ features:
 
 ## Installation
 
-Install `MLPROP.jl` in Julia by
+Install `MLThermoProperties.jl` in Julia by
 
 ```julia-repl
-julia> using Pkg; Pkg.add("MLPROP")
+julia> using Pkg; Pkg.add("MLThermoProperties")
 ```
 
 ## Properties and Thermodynamic Solvers
 
-`MLPROP.jl` uses **`Clapeyron.jl`** as backend for the **calculation of thermodynamic bulk properties and phase equilibria**.
+`MLThermoProperties.jl` uses **`Clapeyron.jl`** as backend for the **calculation of thermodynamic bulk properties and phase equilibria**.
 The `Clapeyron.jl` documentation can be found [here](https://clapeyronthermo.github.io/Clapeyron.jl/stable/).
 
 For **transport properties**, the methods from **`EntropyScaling.jl`** (see [documentation](https://se-schmitt.github.io/EntropyScaling.jl/stable/)) are employed.
@@ -65,4 +65,4 @@ For **transport properties**, the methods from **`EntropyScaling.jl`** (see [doc
 
 ## Models
 
-The MLPROP models and their usage are documented [here](@ref models_page).
+The MLThermoProperties models and their usage are documented [here](@ref models_page).

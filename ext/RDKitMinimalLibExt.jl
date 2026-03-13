@@ -1,10 +1,10 @@
 module RDKitMinimalLibExt
 
-using MLPROP
+using MLThermoProperties
 using RDKitMinimalLib: RDKitMinimalLib as RDK
 
 function __init__()
-    MLPROP._get_descriptors[] = _get_descriptors_rdk
+    MLThermoProperties._get_descriptors[] = _get_descriptors_rdk
 end
 
 # Get descriptors

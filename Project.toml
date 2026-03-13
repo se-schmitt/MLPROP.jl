@@ -1,4 +1,4 @@
-name = "MLPROP"
+name = "MLThermoProperties"
 uuid = "5b10a24f-5c48-4ecd-8f3d-34970e95074b"
 version = "0.1.0"
 authors = ["se-schmitt <se.s.schmitt@gmail.com> and contributors"]

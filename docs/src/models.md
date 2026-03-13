@@ -17,8 +17,8 @@ Two versions of the model are available:
 - **`HANNA`** (alias `multHANNA`): The latest version, trained on VLE and LLE data, and applicable to multi-component mixtures [hoffmann_thermodynamically_2026](@cite).
 
 ```@docs
-MLPROP.ogHANNA
-MLPROP.multHANNA
+MLThermoProperties.ogHANNA
+MLThermoProperties.multHANNA
 ```
 
 ## mod. UNIFAC 2.0 and UNIFAC 2.0
@@ -43,7 +43,7 @@ The model predicts the parameters ``A``, ``B``, and ``C`` of the Antoine equatio
 On model construction, the Antoine parameters are predicted and a [`SaturationModel`](https://clapeyronthermo.github.io/Clapeyron.jl/stable/eos/correlations/#Clapeyron.SaturationModel) is automatically created, which enables the calculation of the vapor pressure via [`saturation_pressure`](https://clapeyronthermo.github.io/Clapeyron.jl/stable/properties/single/#Clapeyron.saturation_pressure) for a given temperature.
 
 ```@docs
-MLPROP.GRAPPA
+MLThermoProperties.GRAPPA
 ```
 
 ## ESE
@@ -55,5 +55,5 @@ The model incorporates the Stokes-Einstein equation and ensures a physically con
 It only requires the SMILES of the solute and solvent as input, together with a viscosity model for the solvent.
 
 ```@docs
-MLPROP.ESE
+MLThermoProperties.ESE
 ```

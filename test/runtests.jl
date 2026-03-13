@@ -1,6 +1,6 @@
 using Test
 
-@testset "MLPROP.jl" begin
+@testset "MLThermoProperties.jl" begin
     include("mlprop.jl")
 end
 

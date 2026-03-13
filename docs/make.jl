@@ -1,14 +1,14 @@
 using Documenter
 using DocumenterVitepress
 using DocumenterCitations
-using MLPROP, Clapeyron
+using MLThermoProperties, Clapeyron
 
 bib = CitationBibliography(joinpath(@__DIR__, "src", "refs.bib"); style=:numeric)
 
 makedocs(;
-    sitename = "MLPROP.jl",
+    sitename = "MLThermoProperties.jl",
     format = DocumenterVitepress.MarkdownVitepress(
-        repo = "github.com/se-schmitt/MLPROP.jl",
+        repo = "github.com/se-schmitt/MLThermoProperties.jl",
         devbranch = "main",
         devurl = "dev",
     ),
@@ -21,7 +21,7 @@ makedocs(;
 )
 
 DocumenterVitepress.deploydocs(;
-    repo = "github.com/se-schmitt/MLPROP.jl",
+    repo = "github.com/se-schmitt/MLThermoProperties.jl",
     target = joinpath(@__DIR__, "build"),
     branch = "gh-pages",
     devbranch = "main",

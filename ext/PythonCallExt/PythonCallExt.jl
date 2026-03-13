@@ -1,8 +1,8 @@
 module PythonCallExt
 
-using MLPROP
+using MLThermoProperties
 using PythonCall
-const CL = MLPROP.Clapeyron
+const CL = MLThermoProperties.Clapeyron
 
 const chem = Ref{Py}()
 const desc = Ref{Py}()
@@ -13,8 +13,8 @@ function __init__()
     desc[] = pyimport("rdkit.Chem.Descriptors")
     grappa[] = pyimport("grappa")
 
-    MLPROP._GRAPPA[] = _GRAPPA_python
-    MLPROP._get_descriptors[] = _get_descriptors_python
+    MLThermoProperties._GRAPPA[] = _GRAPPA_python
+    MLThermoProperties._get_descriptors[] = _get_descriptors_python
 end
 
 # GRAPPA
@@ -34,7 +34,7 @@ function _GRAPPA_python(components; userlocations, reference_state, verbose)
     C = CL.SingleParam("C", components, [_abc[3] for _abc in _ABC])
     _T = Base.promote_eltype(A,B,C)
     
-    params = MLPROP.GRAPPAParam(_params["Tc"],A,B,C)
+    params = MLThermoProperties.GRAPPAParam(_params["Tc"],A,B,C)
 
     references = ["10.1016/j.ceja.2025.100750"]
 

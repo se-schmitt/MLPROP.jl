@@ -52,7 +52,7 @@ The implementation is based on [this](https://github.com/tspecht93/HANNA) Github
 
 ## Example
 ```julia
-using MLPROP, Clapeyron
+using MLThermoProperties, Clapeyron
 
 components = ["water","isobutanol"]
 Mw = [18.01528, 74.1216]

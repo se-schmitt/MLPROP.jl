@@ -75,7 +75,7 @@ end
 # Canonicalization of smiles
 function _canonicalize_error(smiles)
     @warn("""
-    SMILES are not canonicalized by `MLPROP.jl`!
+    SMILES are not canonicalized by `MLThermoProperties.jl`!
     Either ensure that the used SMILES are canonicalized or load `RDKitMinimalLib.jl` (not working on Windows).
     """)
     return smiles
