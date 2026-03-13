@@ -4,7 +4,7 @@
 layout: home
 
 hero:
-  name: MLPROP
+  name: MLPROP.jl
   text: State-of-the-art hybrid thermodynamic models
   image:
     src: /logo.png
