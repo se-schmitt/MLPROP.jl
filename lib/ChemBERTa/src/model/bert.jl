@@ -132,8 +132,7 @@ function (model::ChemBERTaModel)(smiles::AbstractString; is_canonical=false)
     _smiles = is_canonical ? smiles : canonicalize(smiles)
 
     # tokenizer
-    enc = encode(model.tokenizer.encoder, _smiles)
-    input_ids = getindex.(findall(enc.token), 1)
+    input_ids = model.tokenizer(_smiles)
     
     # ChemBERTa
     output = model.smodel(input_ids)
