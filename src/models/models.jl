@@ -21,7 +21,7 @@ CL.show_reference_state(io,::ESE) = nothing
 
 # placeholder function for RDKit #TODO move to utils??
 function _get_descriptors_error(smiles)
-    error("To use this functionality in `MLThermoProperties.jl`, you need to install and import either `PythonCall.jl` or `RDKitMinimalLib.jl`!")
+    error("To use this functionality in `MLThermoProperties.jl`, you need to install and import either `PythonCall.jl`!")
     return nothing
 end
 
