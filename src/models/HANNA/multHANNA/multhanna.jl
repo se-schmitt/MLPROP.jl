@@ -1,25 +1,13 @@
 abstract type multHANNAModel <: CL.ActivityModel end
 
 struct multHANNAParam{T,P,S} <: CL.EoSParam
-    emb::Matrix{T}
+    emb::SingleParam{Vector{T}}
     scaler_T::AbstractScaler{T}
     nn::multHANNALux      
-    ps::P                 
-    st::S                 
+    ps::P
+    st::S
     Mw::SingleParam{T}
-    gamma::T              # for RBF-equation
-end
-
-function CL.split_model(param::multHANNAParam, splitter)
-    return [CL.each_split_model(param, i) for i ∈ splitter]
-end
-
-function CL.each_split_model(param::multHANNAParam, i)
-    Mw = CL.each_split_model(param.Mw, i)
-    
-    emb_subset = param.emb[:,i:i]   # check this if emb or emb_scaled
-
-    return multHANNAParam(emb_subset, param.scaler_T, param.nn, param.ps, param.st, Mw, param.gamma)
+    gamma::T                    # for RBF-equation
 end
 
 struct multHANNA{c<:CL.EoSModel,T,P,S} <: multHANNAModel

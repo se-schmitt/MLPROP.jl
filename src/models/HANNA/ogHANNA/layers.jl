@@ -4,6 +4,8 @@
     phi
 end
 
+Clapeyron.is_splittable(::ogHANNALux) = false
+
 function (model::ogHANNALux)((T,x,embs), ps, st)
     θs = first(model.theta(embs, ps.theta, st.theta))
     

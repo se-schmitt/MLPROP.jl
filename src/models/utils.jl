@@ -14,3 +14,5 @@ function load_scaler(path::String, ::Type{Scaler}; T=Float64)
     @load joinpath(DB_PATH, path) μ σ
     return Scaler(T.(μ), T.(σ))
 end
+
+Clapeyron.is_splittable(::AbstractScaler) = false
