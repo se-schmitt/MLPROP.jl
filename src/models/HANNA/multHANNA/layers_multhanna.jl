@@ -29,8 +29,8 @@ function (model::multHANNALux)((T, x, embs), gamma, ps, st)
             X_j_ij = (1.0 + x_adj[j] - x_adj[i]) / 2.0
             
             # Alpha input, adding pair interaction and temperature
-            c_i = vcat(θs[:, i], X_i_ij, T)
-            c_j = vcat(θs[:, j], X_j_ij, T)
+            c_i = vcat(θs[i], X_i_ij, T)
+            c_j = vcat(θs[j], X_j_ij, T)
             
             α_i = first(model.alpha(c_i, ps.alpha, st.alpha))
             α_j = first(model.alpha(c_j, ps.alpha, st.alpha))

@@ -106,9 +106,9 @@ function multHANNA(components;
     if isnothing(BERT)
         global BERT = ChemBERTa.load()
     end
-    emb = hcat(BERT.(smiles; is_canonical=true)...)
+    emb = SingleParam("ChemBERTa embedding", _components, scale.(Ref(scaler_emb), BERT.(smiles; is_canonical=true)))
 
-    params = multHANNAParam(scale(scaler_emb, emb), scaler_T, nn, ps, Lux.testmode.(st), _params["Mw"], 100.0)
+    params = multHANNAParam(emb, scaler_T, nn, ps, Lux.testmode.(st), _params["Mw"], 100.0)
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
     references = String["10.48550/arXiv.2509.06484"]
 
