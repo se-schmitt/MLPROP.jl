@@ -1,24 +1,12 @@
 abstract type ogHANNAModel <: CL.ActivityModel end
 
 struct ogHANNAParam{T,P,S} <: CL.EoSParam
-    emb::Matrix{T}
+    emb::SingleParam{Vector{T}}
     scaler_T::AbstractScaler{T}
     nn::ogHANNALux
     ps::P
     st::S
     Mw::SingleParam{T}
-end
-
-function CL.split_model(param::ogHANNAParam, splitter)
-    return [CL.each_split_model(param, i) for i ∈ splitter]
-end
-
-function CL.each_split_model(param::ogHANNAParam, i)
-    Mw = CL.each_split_model(param.Mw, i)
-    
-    emb_subset = param.emb_scaled[:,i:i]
-
-    return ogHANNAParam(emb_subset, param.T_scaler, param.model, param.ps, param.st, Mw)
 end
 
 struct ogHANNA{c<:CL.EoSModel,T,P,S} <: ogHANNAModel
@@ -107,9 +95,9 @@ function ogHANNA(components;
     if isnothing(BERT)
         global BERT = ChemBERTa.load()
     end
-    emb = hcat(BERT.(smiles; is_canonical=true)...)
+    emb = SingleParam("ChemBERTa embedding", _components, scale.(scaler_emb, BERT.(smiles; is_canonical=true)))
 
-    params = ogHANNAParam(scale(scaler_emb, emb), scaler_T, nn, ps, st, _params["Mw"])
+    params = ogHANNAParam(emb, scaler_T, nn, ps, st, _params["Mw"])
     
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
     references = String["10.1039/D4SC05115G"]
@@ -124,7 +112,7 @@ function CL.excess_gibbs_free_energy(model::ogHANNA, p, T, z)
     
     params = model.params
     Ts = scale(params.scaler_T, T)
-    gE = params.nn((Ts,x,params.emb), params.ps, params.st)
+    gE = params.nn((Ts,x,params.emb.values), params.ps, params.st)
     
     return gE * Rgas(model) * T * sum(z)
 end

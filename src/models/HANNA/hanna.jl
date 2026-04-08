@@ -1,5 +1,5 @@
 # ogHANNA
-include("ogHANNA/layers.jl")
+include("ogHANNA/layers_oghanna.jl")
 include("ogHANNA/oghanna.jl")
 
 #multHANNA

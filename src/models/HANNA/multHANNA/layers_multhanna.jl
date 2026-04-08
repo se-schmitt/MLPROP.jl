@@ -10,17 +10,18 @@ Clapeyron.is_splittable(::multHANNALux) = false
 
 function (model::multHANNALux)((T, x, embs), gamma, ps, st)
     N = length(x)
-    # theta input
-    θs = [first(model.theta(_emb, ps.theta, st.theta)) for _emb in embs] # Output: (96, N)
+    
+    θs = [first(model.theta(_emb, ps.theta, st.theta)) for _emb in embs]
 
-    rbf_sim = zeros(N,N)
+    rbf_sim = ones(N,N)
     for i in 1:N, j in (i+1):N
         rbf_sim[i,j] = exp(-gamma * sum(abs2, θs[i] .- θs[j]))
+        rbf_sim[j,i] = rbf_sim[i,j]
     end
     
-    x_adj = [sum(x[j] * rbf_sim[i, j] for j in 1:N) for i in 1:N]
+    x_adj = rbf_sim * x
     
-    gE_total = zero(eltype(x)) 
+    gE_total = zero(Base.promote_eltype(T,x))
     
     for i in 1:N
         for j in (i+1):N

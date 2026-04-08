@@ -106,7 +106,7 @@ function multHANNA(components;
     if isnothing(BERT)
         global BERT = ChemBERTa.load()
     end
-    emb = SingleParam("ChemBERTa embedding", _components, scale.(Ref(scaler_emb), BERT.(smiles; is_canonical=true)))
+    emb = SingleParam("ChemBERTa embedding", _components, scale.(scaler_emb, BERT.(smiles; is_canonical=true)))
 
     params = multHANNAParam(emb, scaler_T, nn, ps, Lux.testmode.(st), _params["Mw"], 100.0)
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
@@ -124,7 +124,7 @@ function CL.excess_gibbs_free_energy(model::multHANNAModel, p, T, z)
     
     params = model.params
     # Embeddings and RBF-Gamma
-    embs = params.emb
+    embs = params.emb.values
     gamma = params.gamma
     
     # all_ps and all_st contains all parameters of all 10 ensemble models

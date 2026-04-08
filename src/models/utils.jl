@@ -15,4 +15,7 @@ function load_scaler(path::String, ::Type{Scaler}; T=Float64)
     return Scaler(T.(μ), T.(σ))
 end
 
+Base.broadcastable(scaler::AbstractScaler) = Ref(scaler)
 Clapeyron.is_splittable(::AbstractScaler) = false
+
+Clapeyron.is_splittable(::NamedTuple) = false       #TODO move to Clapeyron
