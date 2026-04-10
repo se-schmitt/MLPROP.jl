@@ -28,7 +28,7 @@ features:
     link: /models
 
   - icon: <img width="150" height="64" src="Clapeyron_logo_without_text.svg" alt="Clapeyron"/>
-    title: Build on Clapeyron.jl
+    title: Built on Clapeyron.jl
     details: Use the rich thermodynamics solvers from Clapeyron.jl
     link: https://github.com/ClapeyronThermo/Clapeyron.jl
 
@@ -49,7 +49,7 @@ julia> using Pkg; Pkg.add("MLThermoProperties")
 
 ## Properties and Thermodynamic Solvers
 
-`MLThermoProperties.jl` uses **`Clapeyron.jl`** as backend for the **calculation of thermodynamic bulk properties and phase equilibria**.
+`MLThermoProperties.jl` uses **`Clapeyron.jl`** as a backend for the **calculation of thermodynamic bulk properties and phase equilibria**.
 The `Clapeyron.jl` documentation can be found [here](https://clapeyronthermo.github.io/Clapeyron.jl/stable/).
 
 For **transport properties**, the methods from **`EntropyScaling.jl`** (see [documentation](https://se-schmitt.github.io/EntropyScaling.jl/stable/)) are employed.
