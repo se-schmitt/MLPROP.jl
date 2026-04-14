@@ -1,0 +1,17 @@
+name = "MLThermoPropertiesTests"
+
+[deps]
+ChemBERTa = "c6d5ccb6-415a-469b-bc0e-e5c43fa6df39"
+Clapeyron = "7c7805af-46cc-48c9-995b-ed0ed2dc909a"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+EntropyScaling = "36a13073-9e6e-4b19-b12b-cb530e79ee8e"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+MLThermoProperties = "5b10a24f-5c48-4ecd-8f3d-34970e95074b"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+RDKitMinimalLib = "44044271-7623-48dc-8250-42433c44e4b7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
+
+[compat]
+DelimitedFiles = "1.9.1"
+julia = "1.11"
