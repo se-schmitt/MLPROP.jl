@@ -3,7 +3,7 @@ name = "grappa"
 version = "0.1.0"
 description = "GRAPPA model to be used in MLThermoProperties.jl"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "rdkit==2024.9.4",
     "torch>=2.10.0",
