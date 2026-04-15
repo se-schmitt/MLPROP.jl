@@ -101,7 +101,7 @@ function ogHANNA(components;
     
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
     references = String["10.1039/D4SC05115G"]
-    model = ogHANNA(components, params, _puremodel, references)
+    model = ogHANNA(_components, params, _puremodel, references)
     CL.set_reference_state!(model,reference_state,verbose = verbose)
 
     return model

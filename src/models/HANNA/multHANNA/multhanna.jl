@@ -112,7 +112,7 @@ function multHANNA(components;
     _puremodel = CL.init_puremodel(puremodel, components, pure_userlocations, verbose)
     references = String["10.48550/arXiv.2509.06484"]
 
-    model = multHANNA(components, params, _puremodel, references)
+    model = multHANNA(_components, params, _puremodel, references)
     CL.set_reference_state!(model, reference_state, verbose = verbose)
 
     return model
